@@ -69,6 +69,10 @@
 			<Add option="-fexceptions" />
 			<Add option="-fPIC" />
 		</Compiler>
+		<Unit filename="CMakeLists.txt" />
+		<Unit filename="config/nether.policy" />
+		<Unit filename="config/nether.rules" />
+		<Unit filename="config/setrules.sh" />
 		<Unit filename="include/logger/backend-file.hpp" />
 		<Unit filename="include/logger/backend-journal.hpp" />
 		<Unit filename="include/logger/backend-null.hpp" />
@@ -89,6 +93,9 @@
 		<Unit filename="include/nether_PolicyBackend.h" />
 		<Unit filename="include/nether_Types.h" />
 		<Unit filename="include/nether_Utils.h" />
+		<Unit filename="packaging/nether.manifest" />
+		<Unit filename="packaging/nether.spec" />
+		<Unit filename="src/CMakeLists.txt" />
 		<Unit filename="src/logger/backend-file.cpp" />
 		<Unit filename="src/logger/backend-journal.cpp" />
 		<Unit filename="src/logger/backend-stderr.cpp" />
@@ -99,7 +106,6 @@
 		<Unit filename="src/logger/logger-scope.cpp" />
 		<Unit filename="src/logger/logger.cpp" />
 		<Unit filename="src/nether_CynaraBackend.cpp" />
-		<Unit filename="src/nether_DummyBackend.cpp" />
 		<Unit filename="src/nether_FileBackend.cpp" />
 		<Unit filename="src/nether_Main.cpp" />
 		<Unit filename="src/nether_Manager.cpp" />

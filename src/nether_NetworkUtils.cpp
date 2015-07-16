@@ -1,3 +1,27 @@
+/*
+ *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *
+ *  Contact: Roman Kubiak (r.kubiak@samsung.com)
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License
+ */
+
+/**
+ * @file
+ * @author  Roman Kubiak (r.kubiak@samsung.com)
+ * @brief   Network utility functions for nether
+ */
+
 #include <netdb.h>
 #include <linux/types.h>
 #include "nether_Utils.h"
@@ -14,9 +38,9 @@
 
 void decodePacket(NetherPacket &packet, unsigned char *payload)
 {
-    uint8_t ip_version = (payload[0] >> 4) & 0x0F;
+    uint8_t ipVersion = (payload[0] >> 4) & 0x0F;
 
-    switch(ip_version)
+    switch(ipVersion)
     {
         case 4:
             packet.protocolType     = IPv4;
@@ -35,23 +59,23 @@ void decodePacket(NetherPacket &packet, unsigned char *payload)
 
 void decodeIPv6Packet(NetherPacket &packet, unsigned char *payload)
 {
-    const uint16_t start_of_ip_payload = 40;
-    uint8_t next_proto;
+    const uint16_t startOfIpPayload = 40;
+    uint8_t nextProto;
 
     memcpy(packet.localAddress, &payload[8], NETHER_NETWORK_IPV6_ADDR_LEN);
     memcpy(packet.remoteAddress, &payload[24], NETHER_NETWORK_IPV6_ADDR_LEN);
 
-    next_proto = payload[6];
+    nextProto = payload[6];
 
-    switch(next_proto)
+    switch(nextProto)
     {
         case IP_PROTOCOL_UDP:
             packet.transportType = UDP;
-            decodeUdp(packet, &payload[start_of_ip_payload]);
+            decodeUdp(packet, &payload[startOfIpPayload]);
             break;
         case IP_PROTOCOL_TCP:
             packet.transportType = TCP;
-            decodeTcp(packet, &payload[start_of_ip_payload]);
+            decodeTcp(packet, &payload[startOfIpPayload]);
             break;
         case IP_PROTOCOL_ICMP:
             packet.transportType = ICMP;
@@ -67,24 +91,25 @@ void decodeIPv6Packet(NetherPacket &packet, unsigned char *payload)
 
 void decodeIPv4Packet(NetherPacket &packet, unsigned char *payload)
 {
-    uint16_t start_of_ip_payload = 0;
-    uint8_t next_proto;
+    uint16_t startOfIpPayload = 0;
+    uint8_t nextProto;
 
-    start_of_ip_payload = (payload[0]&0x0F) << 2;
+    startOfIpPayload = (payload[0]&0x0F) << 2;
 
     memcpy(packet.localAddress, &payload[12], NETHER_NETWORK_IPV4_ADDR_LEN);
     memcpy(packet.remoteAddress, &payload[16], NETHER_NETWORK_IPV4_ADDR_LEN);
 
-    next_proto = payload[9];
-    switch(next_proto)
+    nextProto = payload[9];
+
+    switch(nextProto)
     {
         case IP_PROTOCOL_UDP:
             packet.transportType = UDP;
-            decodeUdp(packet, &payload[start_of_ip_payload]);
+            decodeUdp(packet, &payload[startOfIpPayload]);
             break;
         case IP_PROTOCOL_TCP:
             packet.transportType = TCP;
-            decodeTcp(packet, &payload[start_of_ip_payload]);
+            decodeTcp(packet, &payload[startOfIpPayload]);
             break;
         case IP_PROTOCOL_ICMP:
             packet.transportType = ICMP;

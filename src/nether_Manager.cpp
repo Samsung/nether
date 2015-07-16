@@ -1,3 +1,27 @@
+/*
+ *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *
+ *  Contact: Roman Kubiak (r.kubiak@samsung.com)
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License
+ */
+
+/**
+ * @file
+ * @author  Roman Kubiak (r.kubiak@samsung.com)
+ * @brief   Manager class implementation for nether
+ */
+
 #include "nether_Manager.h"
 #include "nether_CynaraBackend.h"
 #include "nether_FileBackend.h"
@@ -9,24 +33,20 @@ NetherManager::NetherManager(const NetherConfig &_netherConfig)
         netherBackupPolicyBackend(nullptr),
         netherFallbackPolicyBackend(nullptr)
 {
-    netherNetlink               = new NetherNetlink(netherConfig);
+    netherNetlink               = std::unique_ptr<NetherNetlink> (new NetherNetlink(netherConfig));
     netherNetlink->setListener (this);
 
-    netherPrimaryPolicyBackend	= getPolicyBackend (netherConfig);
+    netherPrimaryPolicyBackend	= std::unique_ptr<NetherPolicyBackend> (getPolicyBackend (netherConfig));
     netherPrimaryPolicyBackend->setListener (this);
 
-    netherBackupPolicyBackend   = getPolicyBackend (netherConfig, false);
+    netherBackupPolicyBackend   = std::unique_ptr<NetherPolicyBackend> (getPolicyBackend (netherConfig, false));
     netherBackupPolicyBackend->setListener (this);
 
-    netherFallbackPolicyBackend = new NetherDummyBackend(netherConfig);
+    netherFallbackPolicyBackend = std::unique_ptr<NetherPolicyBackend> (new NetherDummyBackend(netherConfig));
 }
 
 NetherManager::~NetherManager()
 {
-    deleteAndZero (netherPrimaryPolicyBackend);
-    deleteAndZero (netherBackupPolicyBackend);
-    deleteAndZero (netherFallbackPolicyBackend);
-    deleteAndZero (netherNetlink);
     close (signalDescriptor);
 }
 
@@ -81,42 +101,12 @@ const bool NetherManager::initialize()
 
 const bool NetherManager::process()
 {
-    NetherPacket receivedPacket;
-    int packetReadSize;
-    ssize_t signalRead;
-    struct signalfd_siginfo signalfdSignalInfo;
     fd_set watchedReadDescriptorsSet, watchedWriteDescriptorsSet;
     struct timeval timeoutSpecification;
-    char packetBuffer[NETHER_PACKET_BUFFER_SIZE] __attribute__ ((aligned));
 
-    while (1)
+    for (;;)
     {
-	    FD_ZERO (&watchedReadDescriptorsSet);
-	    FD_ZERO (&watchedWriteDescriptorsSet);
-
-        /* Always listen for signals */
-        FD_SET (signalDescriptor, &watchedReadDescriptorsSet);
-
-	    if ((netlinkDescriptor = netherNetlink->getDescriptor()) >= 0)
-        {
-            FD_SET(netlinkDescriptor, &watchedReadDescriptorsSet);
-        }
-
-        if ((backendDescriptor = netherPrimaryPolicyBackend->getDescriptor()) >= 0)
-        {
-            if (netherPrimaryPolicyBackend->getDescriptorStatus() == readOnly)
-            {
-                FD_SET(backendDescriptor, &watchedReadDescriptorsSet);
-            }
-            else if (netherPrimaryPolicyBackend->getDescriptorStatus() == readWrite)
-            {
-                FD_SET(backendDescriptor, &watchedReadDescriptorsSet);
-                FD_SET(backendDescriptor, &watchedWriteDescriptorsSet);
-            }
-        }
-
-	    timeoutSpecification.tv_sec     = 240;
-        timeoutSpecification.tv_usec    = 0;
+	    setupSelectSockets (watchedReadDescriptorsSet, watchedWriteDescriptorsSet, timeoutSpecification);
 
         if (select (FD_SETSIZE, &watchedReadDescriptorsSet, &watchedWriteDescriptorsSet, NULL, &timeoutSpecification) < 0)
         {
@@ -126,60 +116,15 @@ const bool NetherManager::process()
 
         if (FD_ISSET(signalDescriptor, &watchedReadDescriptorsSet))
         {
-            LOGD("received signal");
-            signalRead = read (signalDescriptor, &signalfdSignalInfo, sizeof(struct signalfd_siginfo));
-
-            if (signalRead != sizeof(struct signalfd_siginfo))
-            {
-                LOGW("Received incomplete signal information, ignore");
-                continue;
-            }
-
-            if (signalfdSignalInfo.ssi_signo == SIGHUP)
-            {
-                LOGI("SIGHUP received, reloading");
-                if (!netherPrimaryPolicyBackend->reload())
-                    LOGW("primary backend failed to reload");
-                if (!netherBackupPolicyBackend->reload())
-                    LOGW("backup backend failed to reload");
-                if (!netherNetlink->reload())
-                    LOGW("netlink failed to reload");
-                continue;
-            }
+            handleSignal();
         }
         if (FD_ISSET(netlinkDescriptor, &watchedReadDescriptorsSet))
         {
-            LOGD("netlink descriptor active");
-
-            /* some data arrives on netlink, read it */
-            if ((packetReadSize = recv(netlinkDescriptor, packetBuffer, sizeof(packetBuffer), 0)) >= 0)
-            {
-                /* try to process the packet using netfilter_queue library, fetch packet info
-                    needed for making a decision about it */
-                if (netherNetlink->processPacket (packetBuffer, packetReadSize))
-                {
-                   continue;
-                }
-                else
-                {
-                    /* if we can't process the incoming packets, it's bad. Let's exit now */
-                    LOGE("Failed to process netlink received packet, refusing to continue");
-                    break;
-                }
-            }
-
-            if (packetReadSize < 0 && errno == ENOBUFS)
-            {
-                LOGI("NetherManager::process losing packets! [bad things might happen]");
-                continue;
-            }
-
-            LOGE("NetherManager::process recv failed " << strerror(errno));
-            break;
+            if (!handleNetlinkpacket())
+                break;
         }
         else if (FD_ISSET(backendDescriptor, &watchedReadDescriptorsSet) || FD_ISSET(backendDescriptor, &watchedWriteDescriptorsSet))
         {
-            LOGD("policy backend descriptor active");
             netherPrimaryPolicyBackend->processEvents();
         }
         else
@@ -187,6 +132,96 @@ const bool NetherManager::process()
             LOGD("select() timeout");
         }
     }
+}
+
+void NetherManager::handleSignal()
+{
+    LOGD("received signal");
+    ssize_t signalRead;
+    struct signalfd_siginfo signalfdSignalInfo;
+
+    signalRead = read (signalDescriptor, &signalfdSignalInfo, sizeof(struct signalfd_siginfo));
+
+    if (signalRead != sizeof(struct signalfd_siginfo))
+    {
+        LOGW("Received incomplete signal information, ignore");
+        return;
+    }
+
+    if (signalfdSignalInfo.ssi_signo == SIGHUP)
+    {
+        LOGI("SIGHUP received, reloading");
+        if (!netherPrimaryPolicyBackend->reload())
+            LOGW("primary backend failed to reload");
+        if (!netherBackupPolicyBackend->reload())
+            LOGW("backup backend failed to reload");
+        if (!netherNetlink->reload())
+            LOGW("netlink failed to reload");
+    }
+}
+
+const bool NetherManager::handleNetlinkpacket()
+{
+    LOGD("netlink descriptor active");
+    int packetReadSize;
+    NetherPacket receivedPacket;
+    char packetBuffer[NETHER_PACKET_BUFFER_SIZE] __attribute__ ((aligned));
+
+    /* some data arrives on netlink, read it */
+    if ((packetReadSize = recv(netlinkDescriptor, packetBuffer, sizeof(packetBuffer), 0)) >= 0)
+    {
+        /* try to process the packet using netfilter_queue library, fetch packet info
+            needed for making a decision about it */
+        if (netherNetlink->processPacket (packetBuffer, packetReadSize))
+        {
+            return (true);
+        }
+        else
+        {
+            /* if we can't process the incoming packets, it's bad. Let's exit now */
+            LOGE("Failed to process netlink received packet, refusing to continue");
+            return (false);
+        }
+    }
+
+    if (packetReadSize < 0 && errno == ENOBUFS)
+    {
+        LOGI("NetherManager::process losing packets! [bad things might happen]");
+        return (true);
+    }
+
+    LOGE("NetherManager::process recv failed " << strerror(errno));
+    return (false);
+}
+
+void NetherManager::setupSelectSockets(fd_set &watchedReadDescriptorsSet, fd_set &watchedWriteDescriptorsSet, struct timeval &timeoutSpecification)
+{
+    FD_ZERO (&watchedReadDescriptorsSet);
+    FD_ZERO (&watchedWriteDescriptorsSet);
+
+    /* Always listen for signals */
+    FD_SET (signalDescriptor, &watchedReadDescriptorsSet);
+
+    if ((netlinkDescriptor = netherNetlink->getDescriptor()) >= 0)
+    {
+        FD_SET(netlinkDescriptor, &watchedReadDescriptorsSet);
+    }
+
+    if ((backendDescriptor = netherPrimaryPolicyBackend->getDescriptor()) >= 0)
+    {
+        if (netherPrimaryPolicyBackend->getDescriptorStatus() == readOnly)
+        {
+            FD_SET(backendDescriptor, &watchedReadDescriptorsSet);
+        }
+        else if (netherPrimaryPolicyBackend->getDescriptorStatus() == readWrite)
+        {
+            FD_SET(backendDescriptor, &watchedReadDescriptorsSet);
+            FD_SET(backendDescriptor, &watchedWriteDescriptorsSet);
+        }
+    }
+
+    timeoutSpecification.tv_sec     = 240;
+    timeoutSpecification.tv_usec    = 0;
 }
 
 NetherConfig &NetherManager::getConfig()

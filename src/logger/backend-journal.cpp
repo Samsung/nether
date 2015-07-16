@@ -69,4 +69,4 @@ void SystemdJournalBackend::log(LogLevel logLevel,
 }
 
 } // namespace logger
-#endif
+#endif // HAVE_SYSTEMD_JOURNAL
