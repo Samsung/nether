@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="nether" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<MakeCommands>
+			<Build command="$make root@guest make all -C devel/nether" />
+			<CompileFile command="$make -f $makefile $file" />
+			<Clean command="$make -f $makefile clean$target" />
+			<DistClean command="$make -f $makefile distclean$target" />
+			<AskRebuildNeeded command="$make -q -f $makefile $target" />
+			<SilentBuild command="$make root@guest make all -C devel/nether &gt; $(CMD_NULL)" />
+		</MakeCommands>
+		<Build>
+			<Target title="Debug">
+				<Option output="obj/nether" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="obj" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option parameters="-B /etc/nether.policy -l stderr" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-Wfatal-errors" />
+					<Add option="-Wextra" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-DHAVE_CYNARA" />
+					<Add option="-D_DEBUG" />
+					<Add directory="include" />
+					<Add directory="/usr/local/include/cynara" />
+				</Compiler>
+				<Linker>
+					<Add library="libnetfilter_queue" />
+					<Add library="libnfnetlink" />
+					<Add library="libcynara-client-async" />
+					<Add library="libcynara-commons" />
+					<Add directory="/usr/local/lib" />
+				</Linker>
+				<MakeCommands>
+					<Build command="$make root@guest make all -C devel/nether" />
+					<CompileFile command="$make -f $makefile $file" />
+					<Clean command="$make root@guest make clean -C devel/nether" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make root@guest make all -C devel/nether &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/nether" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-std=c++11" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-fomit-frame-pointer" />
+			<Add option="-std=c++11" />
+			<Add option="-w" />
+			<Add option="-fexceptions" />
+			<Add option="-fPIC" />
+		</Compiler>
+		<Unit filename="include/logger/backend-file.hpp" />
+		<Unit filename="include/logger/backend-journal.hpp" />
+		<Unit filename="include/logger/backend-null.hpp" />
+		<Unit filename="include/logger/backend-stderr.hpp" />
+		<Unit filename="include/logger/backend-syslog.hpp" />
+		<Unit filename="include/logger/backend.hpp" />
+		<Unit filename="include/logger/ccolor.hpp" />
+		<Unit filename="include/logger/config.hpp" />
+		<Unit filename="include/logger/formatter.hpp" />
+		<Unit filename="include/logger/level.hpp" />
+		<Unit filename="include/logger/logger-scope.hpp" />
+		<Unit filename="include/logger/logger.hpp" />
+		<Unit filename="include/nether_CynaraBackend.h" />
+		<Unit filename="include/nether_DummyBackend.h" />
+		<Unit filename="include/nether_FileBackend.h" />
+		<Unit filename="include/nether_Manager.h" />
+		<Unit filename="include/nether_Netlink.h" />
+		<Unit filename="include/nether_PolicyBackend.h" />
+		<Unit filename="include/nether_Types.h" />
+		<Unit filename="include/nether_Utils.h" />
+		<Unit filename="src/logger/backend-file.cpp" />
+		<Unit filename="src/logger/backend-journal.cpp" />
+		<Unit filename="src/logger/backend-stderr.cpp" />
+		<Unit filename="src/logger/backend-syslog.cpp" />
+		<Unit filename="src/logger/ccolor.cpp" />
+		<Unit filename="src/logger/formatter.cpp" />
+		<Unit filename="src/logger/level.cpp" />
+		<Unit filename="src/logger/logger-scope.cpp" />
+		<Unit filename="src/logger/logger.cpp" />
+		<Unit filename="src/nether_CynaraBackend.cpp" />
+		<Unit filename="src/nether_DummyBackend.cpp" />
+		<Unit filename="src/nether_FileBackend.cpp" />
+		<Unit filename="src/nether_Main.cpp" />
+		<Unit filename="src/nether_Manager.cpp" />
+		<Unit filename="src/nether_Netlink.cpp" />
+		<Unit filename="src/nether_NetworkUtils.cpp" />
+		<Extensions>
+			<envvars />
+			<code_completion />
+			<debugger>
+				<search_path add="/root/devel/nether/" />
+				<search_path add="/root/devel/nether/src" />
+				<search_path add="/root/devel/nether/include" />
+			</debugger>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
