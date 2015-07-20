@@ -26,7 +26,8 @@
 #include "logger/level.hpp"
 
 #include <stdexcept>
-#include <boost/algorithm/string.hpp>
+#if defined(HAVE_BOOST)
+  #include <boost/algorithm/string.hpp>
 
 namespace logger {
 
@@ -48,6 +49,29 @@ LogLevel parseLogLevel(const std::string& level)
         throw std::runtime_error("Invalid LogLevel to parse");
     }
 }
+#else
+#include <string.h>
+namespace logger {
+
+LogLevel parseLogLevel(const std::string& level)
+{
+    if (strcmp(level.c_str(), "ERROR")) {
+        return LogLevel::ERROR;
+    } else if (strcmp(level.c_str(), "WARN") == 0) {
+        return LogLevel::WARN;
+    } else if (strcmp(level.c_str(), "INFO") == 0) {
+        return LogLevel::INFO;
+    } else if (strcmp(level.c_str(), "DEBUG") == 0) {
+        return LogLevel::DEBUG;
+    } else if (strcmp(level.c_str(), "TRACE") == 0) {
+        return LogLevel::TRACE;
+    } else if (strcmp(level.c_str(), "HELP") == 0) {
+        return LogLevel::HELP;
+    } else {
+        throw std::runtime_error("Invalid LogLevel to parse");
+    }
+}
+#endif
 
 std::string toString(const LogLevel logLevel)
 {

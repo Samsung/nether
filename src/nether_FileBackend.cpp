@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  *  Contact: Roman Kubiak (r.kubiak@samsung.com)
  *
@@ -72,7 +72,7 @@ const bool NetherFileBackend::enqueueVerdict(const NetherPacket &packet)
         }
     }
 
-    return (false);
+    return (castVerdict(packet, netherConfig.defaultVerdict));
 }
 
 const bool NetherFileBackend::parsePolicyFile(std::ifstream &policyFile)

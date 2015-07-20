@@ -26,7 +26,9 @@
 #include "logger/backend-stderr.hpp"
 #include "logger/formatter.hpp"
 
-#include <boost/tokenizer.hpp>
+#if defined(HAVE_BOOST)
+  #include <boost/tokenizer.hpp>
+#endif
 
 namespace logger {
 
@@ -36,6 +38,7 @@ void StderrBackend::log(LogLevel logLevel,
                         const std::string& func,
                         const std::string& message)
 {
+#if defined(HAVE_BOOST)
     typedef boost::char_separator<char> charSeparator;
     typedef boost::tokenizer<charSeparator> tokenizer;
 
@@ -56,6 +59,9 @@ void StderrBackend::log(LogLevel logLevel,
                     useColours ? defaultColor.c_str() : "");
         }
     }
+#else
+    fprintf (stderr, "%s %s\n", LogFormatter::getHeader(logLevel, file, line, func).c_str(), message.c_str());
+#endif
 }
 
 } // namespace logger

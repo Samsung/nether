@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  *  Contact: Roman Kubiak (r.kubiak@samsung.com)
  *
@@ -34,6 +34,8 @@
 #include <memory>
 
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <errno.h>
 #include <string.h>
 #include <signal.h>
@@ -44,19 +46,28 @@
 #include <sys/signalfd.h>
 #include <linux/types.h>
 #include <linux/netfilter.h>
+
+#if defined(HAVE_AUDIT)
+  #include <libaudit.h>
+#endif // HAVE_AUDIT
+
 #include <libnetfilter_queue/libnetfilter_queue.h>
 #include "logger/logger.hpp"
 #include "logger/backend-file.hpp"
 #include "logger/backend-stderr.hpp"
 #include "logger/backend-syslog.hpp"
 
-#ifdef HAVE_CYNARA
+#if defined(HAVE_SYSTEMD_JOURNAL)
+  #include "logger/backend-journal.hpp"
+#endif // HAVE_SYSTEMD_JOURNAL
+
+#if defined(HAVE_CYNARA)
  #define NETHER_PRIMARY_BACKEND          cynaraBackend
  #define NETHER_BACKUP_BACKEND           fileBackend
 #else
  #define NETHER_PRIMARY_BACKEND          fileBackend
  #define NETHER_BACKUP_BACKEND           dummyBackend
-#endif
+#endif // HAVE_CYNARA
 
 #define NETHER_DEFAULT_VERDICT          allowAndLog
 #define NETHER_PACKET_BUFFER_SIZE       4096
@@ -69,6 +80,14 @@
 #define NETLINK_DROP_MARK               3
 #define NETLINK_ALLOWLOG_MARK           4
 #define NETHER_LOG_BACKEND              stderrBackend
+#define NETHER_IPTABLES_RESTORE_PATH    "/usr/sbin/iptables-restore"
+#ifndef NETHER_RULES_PATH
+  #define NETHER_RULES_PATH             "/etc/nether/nether.rules"
+#endif // NETHER_RULES_PATH
+
+#ifndef NETHER_POLICY_FILE
+  #define NETHER_POLICY_FILE            "/etc/nether/nether.policy"
+#endif // NETHER_POLICY_FILE
 
 enum NetherPolicyBackendType
 {
@@ -143,13 +162,17 @@ struct NetherConfig
     int primaryBackendRetries                   = 3;
     int backupBackendRetries                    = 3;
     int debugMode                               = 0;
-    int nodaemonMode                            = 0;
+    int daemonMode                              = 0;
     int queueNumber                             = 0;
-    std::string backupBackendArgs;
+    std::string backupBackendArgs               = NETHER_POLICY_FILE;
     std::string primaryBackendArgs;
     std::string logBackendArgs;
+    std::string rulesPath                       = NETHER_RULES_PATH;
+    std::string iptablesRestorePath             = NETHER_IPTABLES_RESTORE_PATH;
     uint8_t markDeny                            = NETLINK_DROP_MARK;
     uint8_t markAllowAndLog                     = NETLINK_ALLOWLOG_MARK;
+    int enableAudit                             = 0;
+    int noRules                                 = 0;
 };
 
 class NetherVerdictListener

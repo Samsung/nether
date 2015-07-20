@@ -1,7 +1,0 @@
-# Nether policy
-# $UID:$GID:$SECCTX ALLOW|DENY|ALLOW_LOG
-#
-
-0::_:ALLOW
-5002::_:DENY
-1354787703::_:ALLOW

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  *  Contact: Roman Kubiak (r.kubiak@samsung.com)
  *
@@ -51,8 +51,6 @@ const bool NetherCynaraBackend::initialize()
 
 void NetherCynaraBackend::statusCallback(int oldFd, int newFd, cynara_async_status status, void *data)
 {
-    LOGD("oldFd=" << oldFd << "newFd=" << newFd);
-
     NetherCynaraBackend *backend = static_cast<NetherCynaraBackend *>(data);
 
     if (status == CYNARA_STATUS_FOR_READ)
@@ -80,9 +78,11 @@ const bool NetherCynaraBackend::enqueueVerdict (const NetherPacket &packet)
     char user[NETHER_MAX_USER_LEN];
     cynara_check_id checkId;
 
-    snprintf (user, sizeof(user), "%du", packet.uid);
+    snprintf (user, sizeof(user), "%d", packet.uid);
 
     cynaraLastResult = cynara_async_check_cache(cynaraContext, packet.securityContext.c_str(), "", user, NETHER_CYNARA_INTERNET_PRIVILEGE);
+
+    LOGD ("cynara_async_check_cache ctx=" << packet.securityContext.c_str() << " user=" << user << " privilege=" << NETHER_CYNARA_INTERNET_PRIVILEGE);
 
     switch (cynaraLastResult)
     {
@@ -105,7 +105,7 @@ const bool NetherCynaraBackend::enqueueVerdict (const NetherPacket &packet)
                                                 this);
             if (cynaraLastResult == CYNARA_API_SUCCESS)
             {
-                responseQueue.insert (responseQueue.begin() + checkId, packet.id);
+                responseQueue[checkId] = packet.id;
 
                 return (true);
             }
@@ -131,9 +131,9 @@ const bool NetherCynaraBackend::enqueueVerdict (const NetherPacket &packet)
 void NetherCynaraBackend::setCynaraVerdict(cynara_check_id checkId, int cynaraResult)
 {
     u_int32_t packetId = 0;
-    if ((packetId = responseQueue.at(checkId)) >= 0)
+    if ((packetId = responseQueue[checkId]) >= 0)
     {
-        responseQueue.erase(responseQueue.begin() + checkId);
+        responseQueue[checkId] = -1;
 
         if (cynaraResult == CYNARA_API_ACCESS_ALLOWED)
             castVerdict (packetId, allow);

@@ -16,19 +16,14 @@
 #  limitations under the License
 #
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
-PROJECT (nether)
-INCLUDE (FindPkgConfig)
-SET (CMAKE_CXX_FLAGS "-std=c++11")
-SET (CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+#
+# Nether policy
+# $UID:$GID:$SECCTX ALLOW|DENY|ALLOW_LOG
+# If no match is found for a pcket
+# the default verdict is used (can be set via
+# command line)
+#
 
-IF (NOT DEFINED SYSCONF_INSTALL_DIR)
-    SET(SYSCONF_INSTALL_DIR "/etc")
-ENDIF (NOT DEFINED SYSCONF_INSTALL_DIR)
-
-IF (NOT DEFINED SYSTEMD_UNIT_DIR)
-    SET(SYSTEMD_UNIT_DIR "${CMAKE_INSTALL_PREFIX}/lib/systemd/system")
-ENDIF (NOT DEFINED SYSTEMD_UNIT_DIR)
-
-ADD_SUBDIRECTORY (src)
-ADD_SUBDIRECTORY (conf)
+0::_:ALLOW
+5002::_:DENY
+1354787703::_:ALLOW

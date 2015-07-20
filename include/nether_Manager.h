@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  *  Contact: Roman Kubiak (r.kubiak@samsung.com)
  *
@@ -41,15 +41,24 @@ class NetherManager : public NetherVerdictListener, public NetherProcessedPacket
         static NetherPolicyBackend *getPolicyBackend(const NetherConfig &netherConfig, const bool primary = true);
         bool verdictCast (const u_int32_t packetId, const NetherVerdict verdict);
         void packetReceived (const NetherPacket &packet);
+        const bool restoreRules();
 
     private:
+        static const bool isCommandAvailable(const std::string &command);
         void handleSignal();
         const bool handleNetlinkpacket();
         void setupSelectSockets(fd_set &watchedReadDescriptorsSet, fd_set &watchedWriteDescriptorsSet, struct timeval &timeoutSpecification);
-        std::unique_ptr <NetherPolicyBackend> netherPrimaryPolicyBackend, netherBackupPolicyBackend, netherFallbackPolicyBackend;
+        std::unique_ptr <NetherPolicyBackend> netherPrimaryPolicyBackend;
+        std::unique_ptr <NetherPolicyBackend> netherBackupPolicyBackend;
+        std::unique_ptr <NetherPolicyBackend> netherFallbackPolicyBackend;
         std::unique_ptr <NetherNetlink> netherNetlink;
         NetherConfig netherConfig;
-        int netlinkDescriptor, backendDescriptor, signalDescriptor;
+        int netlinkDescriptor;
+        int backendDescriptor;
+        int signalDescriptor;
+#ifdef HAVE_AUDIT
+        int auditDescriptor;
+#endif // HAVE_AUDIT
         sigset_t signalMask;
 };
 

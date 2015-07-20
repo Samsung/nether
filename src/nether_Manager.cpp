@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  *  Contact: Roman Kubiak (r.kubiak@samsung.com)
  *
@@ -67,6 +67,33 @@ const bool NetherManager::initialize()
         LOGE("Failed acquire signalfd descriptor");
         return (false);
     }
+
+    if (netherConfig.noRules == 0 && restoreRules() == false)
+    {
+        LOGE("Failed to setup iptables rules");
+        return (false);
+    }
+
+#ifdef HAVE_AUDIT
+    if (netherConfig.enableAudit)
+    {
+        if ( (auditDescriptor = audit_open ()) == -1)
+        {
+            LOGE("Failed to open an audit netlink socket: " << strerror(errno));
+            return (false);
+        }
+
+        if (audit_set_enabled (auditDescriptor, 1) <= 0)
+        {
+            LOGE("Failed to enable auditing: " << strerror(errno));
+            return (false);
+        }
+        else
+        {
+            LOGD("Auditing enabled");
+        }
+    }
+#endif // HAVE_AUDIT
 
     if (!netherNetlink->initialize())
     {
@@ -285,4 +312,45 @@ void NetherManager::packetReceived (const NetherPacket &packet)
         or passed as a parameter to the service */
     LOGW("All policy backends failed, using DUMMY backend");
     netherFallbackPolicyBackend->enqueueVerdict (packet);
+}
+
+const bool NetherManager::restoreRules()
+{
+    if (!isCommandAvailable(netherConfig.iptablesRestorePath))
+    {
+        return (false);
+    }
+
+    std::stringstream cmdline;
+    cmdline << netherConfig.iptablesRestorePath;
+    cmdline << " ";
+    cmdline << netherConfig.rulesPath;
+
+    if (system (cmdline.str().c_str()))
+    {
+        LOGE("system() failed for: " << cmdline.str());
+        return (false);
+    }
+
+    LOGD("iptables-restore succeeded with rules from: " << netherConfig.rulesPath);
+    return (true);
+}
+
+const bool NetherManager::isCommandAvailable(const std::string &command)
+{
+    struct stat iptablesRestoreStat;
+
+    if (stat(command.c_str(), &iptablesRestoreStat) == 0)
+    {
+        if (! iptablesRestoreStat.st_mode & S_IXUSR)
+        {
+            LOGE("Execute bit is not set for owner on:" << command);
+            return (false);
+        }
+
+        return (true);
+    }
+
+    LOGE("Failed to stat command at: " << command << " error: " << strerror(errno));
+    return (false);
 }

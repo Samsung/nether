@@ -16,19 +16,14 @@
 #  limitations under the License
 #
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
-PROJECT (nether)
-INCLUDE (FindPkgConfig)
-SET (CMAKE_CXX_FLAGS "-std=c++11")
-SET (CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+[Unit]
+Description=nether service
 
-IF (NOT DEFINED SYSCONF_INSTALL_DIR)
-    SET(SYSCONF_INSTALL_DIR "/etc")
-ENDIF (NOT DEFINED SYSCONF_INSTALL_DIR)
+[Service]
+Type=simple
+ExecStart=${CMAKE_INSTALL_PREFIX}/bin/nether -d -l JOURNAL -B ${SYSCONF_INSTALL_DIR}/nether/nether.policy -r ${SYSCONF_INSTALL_DIR}/nether/nether.rules
+Restart=on-failure
+ExecReload=/bin/kill -HUP $MAINPID
 
-IF (NOT DEFINED SYSTEMD_UNIT_DIR)
-    SET(SYSTEMD_UNIT_DIR "${CMAKE_INSTALL_PREFIX}/lib/systemd/system")
-ENDIF (NOT DEFINED SYSTEMD_UNIT_DIR)
-
-ADD_SUBDIRECTORY (src)
-ADD_SUBDIRECTORY (conf)
+[Install]
+WantedBy=multi-user.target

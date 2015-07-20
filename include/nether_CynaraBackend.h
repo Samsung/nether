@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  *  Contact: Roman Kubiak (r.kubiak@samsung.com)
  *
@@ -25,7 +25,7 @@
 #ifndef NETHER_CYNARA_BACKEND_H
 #define NETHER_CYNARA_BACKEND_H
 
-// #ifdef HAVE_CYNARA
+#ifdef HAVE_CYNARA
 
 #include <cynara-client-async.h>
 #include "nether_PolicyBackend.h"
@@ -70,5 +70,5 @@ class NetherCynaraBackend : public NetherPolicyBackend
         int cynaraLastResult;
 };
 
-// #endif
-#endif
+#endif // HAVE_CYNARA
+#endif // NETHER_CYNARA_BACKEND_H

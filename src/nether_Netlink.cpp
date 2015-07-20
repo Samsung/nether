@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  *  Contact: Roman Kubiak (r.kubiak@samsung.com)
  *
@@ -120,14 +120,16 @@ int NetherNetlink::callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, str
     unsigned char *payload;
 
     if ((ph = nfq_get_msg_packet_hdr(nfa)))
+    {
         packet.id = ntohl(ph->packet_id);
+    }
     else
     {
         LOGI("Failed to get packet id");
         return (1);
     }
 
-    if (!nfq_get_uid(nfa, &packet.uid))
+    if (nfq_get_uid(nfa, &packet.uid) == 0)
         LOGW("Failed to get uid for packet id=" << packet.id);
 
     nfq_get_gid(nfa, &packet.gid);
