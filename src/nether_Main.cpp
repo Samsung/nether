@@ -25,6 +25,7 @@
 #include "nether_Types.h"
 #include "nether_Utils.h"
 #include "nether_Manager.h"
+#include "nether_Daemon.h"
 
 using namespace std;
 void showHelp(char *arg);
@@ -174,7 +175,7 @@ int main(int argc, char *argv[])
 #if defined(_DEBUG)
         << " debug"
 #endif
-        << " daemon="              << netherConfig.daemonMode
+        << " daemon="                << netherConfig.daemonMode
         << " queue="                 << netherConfig.queueNumber);
     LOGD("primary-backend="       << backendTypeToString (netherConfig.primaryBackendType)
         << " primary-backend-args="  << netherConfig.primaryBackendArgs);
@@ -196,6 +197,15 @@ int main(int argc, char *argv[])
     {
         LOGE("NetherManager failed to initialize, exiting");
         return (1);
+    }
+
+    if (netherConfig.daemonMode)
+    {
+        if (!runAsDaemon())
+        {
+            LOGE("Failed to run as daemon: " << strerror(errno));
+            exit (1);
+        }
     }
 
     manager.process();

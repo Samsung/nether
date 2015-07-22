@@ -23,8 +23,8 @@
 :FORWARD ACCEPT [0:0]
 :OUTPUT ACCEPT [816152:74580343]
 :POSTROUTING ACCEPT [824147:75308906]
--A OUTPUT -p tcp -j NFQUEUE --queue-num 0 --queue-bypass
--A OUTPUT -p udp -j NFQUEUE --queue-num 0 --queue-bypass
+-A OUTPUT -p tcp -m state --state NEW -j NFQUEUE --queue-num 0 --queue-bypass
+#-A OUTPUT -p udp -j NFQUEUE --queue-num 0 --queue-bypass
 -A OUTPUT -p icmp -j NFQUEUE --queue-num 0 --queue-bypass
 COMMIT
 *filter

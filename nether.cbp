@@ -90,6 +90,7 @@
 		<Unit filename="include/logger/logger-scope.hpp" />
 		<Unit filename="include/logger/logger.hpp" />
 		<Unit filename="include/nether_CynaraBackend.h" />
+		<Unit filename="include/nether_Daemon.h" />
 		<Unit filename="include/nether_DummyBackend.h" />
 		<Unit filename="include/nether_FileBackend.h" />
 		<Unit filename="include/nether_Manager.h" />
