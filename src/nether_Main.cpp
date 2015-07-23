@@ -152,17 +152,17 @@ int main(int argc, char *argv[])
     }
     switch (netherConfig.logBackend)
     {
-        case stderrBackend:
+        case NetherLogBackendType::stderrBackend:
             logger::Logger::setLogBackend (new logger::StderrBackend(false));
             break;
-        case syslogBackend:
+        case NetherLogBackendType::syslogBackend:
             logger::Logger::setLogBackend (new logger::SyslogBackend());
             break;
-        case logfileBackend:
+        case NetherLogBackendType::logfileBackend:
             logger::Logger::setLogBackend (new logger::FileBackend(netherConfig.logBackendArgs));
             break;
 #if defined(HAVE_SYSTEMD_JOURNAL)
-        case journalBackend:
+        case NetherLogBackendType::journalBackend:
             logger::Logger::setLogBackend (new logger::SystemdJournalBackend());
             break;
 #endif

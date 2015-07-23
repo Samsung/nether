@@ -159,11 +159,11 @@ void NetherNetlink::setVerdict(const u_int32_t packetId, const NetherVerdict ver
     int ret = 0;
     LOGD("id=" << packetId << " verdict=" << verdictToString(verdict));
 
-    if (verdict == allow)
+    if (verdict == NetherVerdict::allow)
         ret = nfq_set_verdict (queueHandle, packetId, NF_ACCEPT, 0, NULL);
-    if (verdict == deny)
+    if (verdict == NetherVerdict::deny)
         ret = nfq_set_verdict2 (queueHandle, packetId, NF_ACCEPT, netherConfig.markDeny, 0, NULL);
-    if (verdict == allowAndLog)
+    if (verdict == NetherVerdict::allowAndLog)
         ret = nfq_set_verdict2 (queueHandle, packetId, NF_ACCEPT, netherConfig.markAllowAndLog, 0, NULL);
 
     if (ret == -1)

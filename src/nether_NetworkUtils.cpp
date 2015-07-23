@@ -43,16 +43,16 @@ void decodePacket(NetherPacket &packet, unsigned char *payload)
     switch(ipVersion)
     {
         case 4:
-            packet.protocolType     = IPv4;
+            packet.protocolType     = NetherProtocolType::IPv4;
             decodeIPv4Packet(packet, payload);
             break;
         case 6:
-            packet.protocolType     = IPv6;
+            packet.protocolType     = NetherProtocolType::IPv6;
             decodeIPv6Packet(packet, payload);
             break;
         default:
-            packet.transportType    = unknownTransportType;
-            packet.protocolType     = unknownProtocolType;
+            packet.transportType    = NetherTransportType::unknownTransportType;
+            packet.protocolType     = NetherProtocolType::unknownProtocolType;
             break;
     }
 }
@@ -70,21 +70,21 @@ void decodeIPv6Packet(NetherPacket &packet, unsigned char *payload)
     switch(nextProto)
     {
         case IP_PROTOCOL_UDP:
-            packet.transportType = UDP;
+            packet.transportType = NetherTransportType::UDP;
             decodeUdp(packet, &payload[startOfIpPayload]);
             break;
         case IP_PROTOCOL_TCP:
-            packet.transportType = TCP;
+            packet.transportType = NetherTransportType::TCP;
             decodeTcp(packet, &payload[startOfIpPayload]);
             break;
         case IP_PROTOCOL_ICMP:
-            packet.transportType = ICMP;
+            packet.transportType = NetherTransportType::ICMP;
             break;
         case IP_PROTOCOL_IGMP:
-            packet.transportType = IGMP;
+            packet.transportType = NetherTransportType::IGMP;
             break;
         default:
-            packet.transportType = unknownTransportType;
+            packet.transportType = NetherTransportType::unknownTransportType;
             break;
     }
 }
@@ -104,20 +104,20 @@ void decodeIPv4Packet(NetherPacket &packet, unsigned char *payload)
     switch(nextProto)
     {
         case IP_PROTOCOL_UDP:
-            packet.transportType = UDP;
+            packet.transportType = NetherTransportType::UDP;
             decodeUdp(packet, &payload[startOfIpPayload]);
             break;
         case IP_PROTOCOL_TCP:
-            packet.transportType = TCP;
+            packet.transportType = NetherTransportType::TCP;
             decodeTcp(packet, &payload[startOfIpPayload]);
             break;
         case IP_PROTOCOL_ICMP:
-            packet.transportType = ICMP;
+            packet.transportType = NetherTransportType::ICMP;
             break;
         case IP_PROTOCOL_IGMP:
-            packet.transportType = IGMP;
+            packet.transportType = NetherTransportType::IGMP;
         default:
-            packet.transportType = unknownTransportType;
+            packet.transportType = NetherTransportType::unknownTransportType;
             break;
     }
 }
@@ -139,9 +139,9 @@ const std::string ipAddressToString(const char *src, enum NetherProtocolType typ
 {
     switch(type)
     {
-        case IPv4:
+        case NetherProtocolType::IPv4:
             return (stringFormat("%u.%u.%u.%u", src[0]&0xff,src[1]&0xff,src[2]&0xff,src[3]&0xff));
-        case IPv6:
+        case NetherProtocolType::IPv6:
             return (stringFormat("%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x",
                             ntohs(*(uint16_t*) &src[0]), ntohs(*(uint16_t*) &src[2]),
                             ntohs(*(uint16_t*) &src[4]), ntohs(*(uint16_t*) &src[6]),

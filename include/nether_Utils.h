@@ -41,56 +41,56 @@ static const NetherVerdict stringToVerdict (char *verdictAsString)
     if (verdictAsString)
     {
         if (strncasecmp (verdictAsString, "allow_log", 9) == 0)
-            return (allowAndLog);
+            return (NetherVerdict::allowAndLog);
         if (strncasecmp (verdictAsString, "allow", 6) == 0)
-            return (allow);
+            return (NetherVerdict::allow);
         if (strncasecmp (verdictAsString, "deny", 4) == 0)
-            return (deny);
+            return (NetherVerdict::deny);
     }
-    return (allowAndLog);
+    return (NetherVerdict::allowAndLog);
 }
 
 static const NetherPolicyBackendType stringToBackendType (char *backendAsString)
 {
     if (strcasecmp (backendAsString, "cynara") == 0)
-      return (cynaraBackend);
+      return (NetherPolicyBackendType::cynaraBackend);
     if (strcasecmp (backendAsString, "file") == 0)
-      return (fileBackend);
+      return (NetherPolicyBackendType::fileBackend);
     if (strcasecmp (backendAsString, "dummy") == 0)
-      return (dummyBackend);
+      return (NetherPolicyBackendType::dummyBackend);
 
-    return (dummyBackend);
+    return (NetherPolicyBackendType::dummyBackend);
 }
 
 static const NetherLogBackendType stringToLogBackendType(char *backendAsString)
 {
     if (strcasecmp (backendAsString, "stderr") == 0)
-      return (stderrBackend);
+      return (NetherLogBackendType::stderrBackend);
     if (strcasecmp (backendAsString, "syslog") == 0)
-      return (syslogBackend);
+      return (NetherLogBackendType::syslogBackend);
     if (strcasecmp (backendAsString, "journal") == 0)
-      return (journalBackend);
+      return (NetherLogBackendType::journalBackend);
     if (strcasecmp (backendAsString, "file") == 0)
-      return (logfileBackend);
+      return (NetherLogBackendType::logfileBackend);
     if (strcasecmp (backendAsString, "null") == 0)
-      return (nullBackend);
+      return (NetherLogBackendType::nullBackend);
 
-    return (nullBackend);
+    return (NetherLogBackendType::nullBackend);
 }
 
 static const std::string logBackendTypeToString(const NetherLogBackendType backendType)
 {
     switch (backendType)
     {
-        case stderrBackend:
+        case NetherLogBackendType::stderrBackend:
             return ("stderr");
-        case syslogBackend:
+        case NetherLogBackendType::syslogBackend:
             return ("syslog");
-        case journalBackend:
+        case NetherLogBackendType::journalBackend:
             return ("journal");
-    case logfileBackend:
+        case NetherLogBackendType::logfileBackend:
             return ("file");
-        case nullBackend:
+        case NetherLogBackendType::nullBackend:
             return ("null");
     }
     return ("null");
@@ -100,11 +100,11 @@ static const std::string backendTypeToString (const NetherPolicyBackendType back
 {
     switch (backendType)
     {
-        case cynaraBackend:
+        case NetherPolicyBackendType::cynaraBackend:
             return ("cynara");
-        case fileBackend:
+        case NetherPolicyBackendType::fileBackend:
             return ("file");
-        case dummyBackend:
+        case NetherPolicyBackendType::dummyBackend:
         default:
             return ("dummy");
     }
@@ -114,11 +114,11 @@ static const std::string verdictToString (const NetherVerdict verdict)
 {
     switch (verdict)
     {
-        case allow:
+        case NetherVerdict::allow:
             return ("ALLOW");
-        case allowAndLog:
+        case NetherVerdict::allowAndLog:
             return ("ALLOW_LOG");
-        case deny:
+        case NetherVerdict::deny:
             return ("DENY");
     }
 }
@@ -127,15 +127,15 @@ static const std::string transportToString(const NetherTransportType transportTy
 {
     switch (transportType)
     {
-        case TCP:
+        case NetherTransportType::TCP:
             return ("TCP");
-        case UDP:
+        case NetherTransportType::UDP:
             return ("UDP");
-        case ICMP:
+        case NetherTransportType::ICMP:
             return ("ICMP");
-        case IGMP:
+        case NetherTransportType::IGMP:
             return ("IGMP");
-        case unknownTransportType:
+        case NetherTransportType::unknownTransportType:
         default:
             return ("UNKNOWN");
     }
@@ -145,9 +145,9 @@ static const std::string protocolToString(const NetherProtocolType protocolType)
 {
     switch (protocolType)
     {
-        case IPv4:
+        case NetherProtocolType::IPv4:
             return ("IPv4");
-        case IPv6:
+        case NetherProtocolType::IPv6:
             return ("IPv6");
         default:
             return ("UNKNOWN");

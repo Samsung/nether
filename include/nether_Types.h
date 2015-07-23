@@ -30,10 +30,11 @@
 #include <errno.h>
 #include <iostream>
 #include <sstream>
-#include <unistd.h>
 #include <memory>
+#include <cstdint>
 
 #include <sys/types.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
@@ -62,14 +63,14 @@
 #endif // HAVE_SYSTEMD_JOURNAL
 
 #if defined(HAVE_CYNARA)
- #define NETHER_PRIMARY_BACKEND          cynaraBackend
- #define NETHER_BACKUP_BACKEND           fileBackend
+ #define NETHER_PRIMARY_BACKEND          NetherPolicyBackendType::cynaraBackend
+ #define NETHER_BACKUP_BACKEND           NetherPolicyBackendType::fileBackend
 #else
  #define NETHER_PRIMARY_BACKEND          fileBackend
  #define NETHER_BACKUP_BACKEND           dummyBackend
 #endif // HAVE_CYNARA
 
-#define NETHER_DEFAULT_VERDICT          allowAndLog
+#define NETHER_DEFAULT_VERDICT          NetherVerdict::allowAndLog
 #define NETHER_PACKET_BUFFER_SIZE       4096
 #define NETHER_INVALID_UID              (uid_t) -1
 #define NETHER_INVALID_GID              (gid_t) -1
@@ -79,7 +80,7 @@
 #define NETHER_MAX_USER_LEN             32
 #define NETLINK_DROP_MARK               3
 #define NETLINK_ALLOWLOG_MARK           4
-#define NETHER_LOG_BACKEND              stderrBackend
+#define NETHER_LOG_BACKEND              NetherLogBackendType::stderrBackend
 #define NETHER_IPTABLES_RESTORE_PATH    "/usr/sbin/iptables-restore"
 #ifndef NETHER_RULES_PATH
   #define NETHER_RULES_PATH             "/etc/nether/nether.rules"
@@ -89,14 +90,14 @@
   #define NETHER_POLICY_FILE            "/etc/nether/nether.policy"
 #endif // NETHER_POLICY_FILE
 
-enum NetherPolicyBackendType
+enum class NetherPolicyBackendType : std::uint8_t
 {
     cynaraBackend,
     fileBackend,
     dummyBackend
 };
 
-enum NetherLogBackendType
+enum class NetherLogBackendType : std::uint8_t
 {
     stderrBackend,
     syslogBackend,
@@ -105,7 +106,7 @@ enum NetherLogBackendType
     nullBackend
 };
 
-enum NetherVerdict
+enum class NetherVerdict : std::uint8_t
 {
     allow,
     allowAndLog,
@@ -113,7 +114,7 @@ enum NetherVerdict
     noVerdictYet
 };
 
-enum NetherDescriptorStatus
+enum class NetherDescriptorStatus : std::uint8_t
 {
     readOnly,
     writeOnly,
@@ -121,7 +122,7 @@ enum NetherDescriptorStatus
     unknownStatus
 };
 
-enum NetherTransportType
+enum class NetherTransportType : std::uint8_t
 {
     TCP,
     UDP,
@@ -130,7 +131,7 @@ enum NetherTransportType
     unknownTransportType
 };
 
-enum NetherProtocolType
+enum class NetherProtocolType : std::uint8_t
 {
     IPv4,
     IPv6,

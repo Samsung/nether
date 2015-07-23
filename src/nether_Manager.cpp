@@ -236,11 +236,11 @@ void NetherManager::setupSelectSockets(fd_set &watchedReadDescriptorsSet, fd_set
 
     if ((backendDescriptor = netherPrimaryPolicyBackend->getDescriptor()) >= 0)
     {
-        if (netherPrimaryPolicyBackend->getDescriptorStatus() == readOnly)
+        if (netherPrimaryPolicyBackend->getDescriptorStatus() == NetherDescriptorStatus::readOnly)
         {
             FD_SET(backendDescriptor, &watchedReadDescriptorsSet);
         }
-        else if (netherPrimaryPolicyBackend->getDescriptorStatus() == readWrite)
+        else if (netherPrimaryPolicyBackend->getDescriptorStatus() == NetherDescriptorStatus::readWrite)
         {
             FD_SET(backendDescriptor, &watchedReadDescriptorsSet);
             FD_SET(backendDescriptor, &watchedWriteDescriptorsSet);
@@ -260,15 +260,15 @@ NetherPolicyBackend *NetherManager::getPolicyBackend(const NetherConfig &netherC
 {
     switch (primary ? netherConfig.primaryBackendType : netherConfig.backupBackendType)
     {
-        case cynaraBackend:
+        case NetherPolicyBackendType::cynaraBackend:
 #ifdef HAVE_CYNARA
             return new NetherCynaraBackend(netherConfig);
 #else
             return new NetherDummyBackend(netherConfig);
 #endif
-        case fileBackend:
+        case NetherPolicyBackendType::fileBackend:
             return new NetherFileBackend(netherConfig);
-        case dummyBackend:
+        case NetherPolicyBackendType::dummyBackend:
         default:
             return new NetherDummyBackend(netherConfig);
     }

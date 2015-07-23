@@ -38,7 +38,7 @@ class NetherPolicyBackend : public NetherVerdictCaster
         virtual const bool reload() { return (true); };
         virtual const bool isValid() = 0;
         virtual const int getDescriptor() { return (-1); }
-        virtual const NetherDescriptorStatus getDescriptorStatus() { return (unknownStatus); }
+        virtual const NetherDescriptorStatus getDescriptorStatus() { return (NetherDescriptorStatus::unknownStatus); }
         virtual const bool processEvents() = 0;
 
     protected:

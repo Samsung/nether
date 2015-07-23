@@ -54,10 +54,10 @@ void NetherCynaraBackend::statusCallback(int oldFd, int newFd, cynara_async_stat
     NetherCynaraBackend *backend = static_cast<NetherCynaraBackend *>(data);
 
     if (status == CYNARA_STATUS_FOR_READ)
-        backend->setCynaraDescriptor(newFd, readOnly);
+        backend->setCynaraDescriptor(newFd, NetherDescriptorStatus::readOnly);
 
     if (status == CYNARA_STATUS_FOR_RW)
-        backend->setCynaraDescriptor(newFd, readWrite);
+        backend->setCynaraDescriptor(newFd, NetherDescriptorStatus::readWrite);
 }
 
 void NetherCynaraBackend::checkCallback(cynara_check_id check_id,
@@ -88,11 +88,11 @@ const bool NetherCynaraBackend::enqueueVerdict (const NetherPacket &packet)
     {
         case CYNARA_API_ACCESS_ALLOWED:
             LOGD(cynaraErrorCodeToString(cynaraLastResult).c_str());
-            return (castVerdict(packet, allow));
+            return (castVerdict(packet, NetherVerdict::allow));
 
         case CYNARA_API_ACCESS_DENIED:
             LOGD(cynaraErrorCodeToString(cynaraLastResult).c_str());
-            return (castVerdict(packet, deny));
+            return (castVerdict(packet, NetherVerdict::deny));
 
         case CYNARA_API_CACHE_MISS:
             cynaraLastResult = cynara_async_create_request(cynaraContext,
@@ -136,9 +136,9 @@ void NetherCynaraBackend::setCynaraVerdict(cynara_check_id checkId, int cynaraRe
         responseQueue[checkId] = -1;
 
         if (cynaraResult == CYNARA_API_ACCESS_ALLOWED)
-            castVerdict (packetId, allow);
+            castVerdict (packetId, NetherVerdict::allow);
         else
-            castVerdict (packetId, deny);
+            castVerdict (packetId, NetherVerdict::deny);
 
         return;
     }
