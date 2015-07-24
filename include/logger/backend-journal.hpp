@@ -27,19 +27,21 @@
 
 #include "logger/backend.hpp"
 
-namespace logger {
+namespace logger
+{
 
-/**
- * systemd journal logging backend
- */
-class SystemdJournalBackend : public LogBackend {
-public:
-    void log(LogLevel logLevel,
-             const std::string& file,
-             const unsigned int& line,
-             const std::string& func,
-             const std::string& message) override;
-};
+	/**
+	 * systemd journal logging backend
+	 */
+	class SystemdJournalBackend : public LogBackend
+	{
+		public:
+			void log(LogLevel logLevel,
+					 const std::string& file,
+					 const unsigned int& line,
+					 const std::string& func,
+					 const std::string& message) override;
+	};
 
 } // namespace logger
 

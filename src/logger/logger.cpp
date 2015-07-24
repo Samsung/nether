@@ -30,47 +30,49 @@
 #include <memory>
 #include <mutex>
 
-namespace logger {
-
-namespace {
-
-volatile LogLevel gLogLevel = LogLevel::DEBUG;
-std::unique_ptr<LogBackend> gLogBackendPtr(new NullLogger());
-std::mutex gLogMutex;
-
-} // namespace
-
-void Logger::logMessage(LogLevel logLevel,
-                        const std::string& message,
-                        const std::string& file,
-                        const unsigned int line,
-                        const std::string& func,
-                        const std::string& rootDir)
+namespace logger
 {
-    std::string sfile = LogFormatter::stripProjectDir(file, rootDir);
-    std::unique_lock<std::mutex> lock(gLogMutex);
-    gLogBackendPtr->log(logLevel, sfile, line, func, message);
-}
 
-void Logger::setLogLevel(const LogLevel level)
-{
-    gLogLevel = level;
-}
+	namespace
+	{
 
-void Logger::setLogLevel(const std::string& level)
-{
-    gLogLevel = parseLogLevel(level);
-}
+		volatile LogLevel gLogLevel = LogLevel::DEBUG;
+		std::unique_ptr<LogBackend> gLogBackendPtr(new NullLogger());
+		std::mutex gLogMutex;
 
-LogLevel Logger::getLogLevel(void)
-{
-    return gLogLevel;
-}
+	} // namespace
 
-void Logger::setLogBackend(LogBackend* pBackend)
-{
-    std::unique_lock<std::mutex> lock(gLogMutex);
-    gLogBackendPtr.reset(pBackend);
-}
+	void Logger::logMessage(LogLevel logLevel,
+							const std::string& message,
+							const std::string& file,
+							const unsigned int line,
+							const std::string& func,
+							const std::string& rootDir)
+	{
+		std::string sfile = LogFormatter::stripProjectDir(file, rootDir);
+		std::unique_lock<std::mutex> lock(gLogMutex);
+		gLogBackendPtr->log(logLevel, sfile, line, func, message);
+	}
+
+	void Logger::setLogLevel(const LogLevel level)
+	{
+		gLogLevel = level;
+	}
+
+	void Logger::setLogLevel(const std::string& level)
+	{
+		gLogLevel = parseLogLevel(level);
+	}
+
+	LogLevel Logger::getLogLevel(void)
+	{
+		return gLogLevel;
+	}
+
+	void Logger::setLogBackend(LogBackend* pBackend)
+	{
+		std::unique_lock<std::mutex> lock(gLogMutex);
+		gLogBackendPtr.reset(pBackend);
+	}
 
 } // namespace logger

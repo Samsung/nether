@@ -35,39 +35,38 @@
 
 static const std::string cynaraErrorCodeToString(int cynaraErrorCode)
 {
-    char errorString[512];
-    int ret;
+	char errorString[512];
+	int ret;
 
-    if ((ret = cynara_strerror(cynaraErrorCode, errorString, 512)) == CYNARA_API_SUCCESS)
-        return (std::string(errorString, strlen(errorString)));
-    else
-        return ("Failed to get error string representation, code="+ret);
+	if((ret = cynara_strerror(cynaraErrorCode, errorString, 512)) == CYNARA_API_SUCCESS)
+		return (std::string(errorString, strlen(errorString)));
+	else
+		return ("Failed to get error string representation, code="+ret);
 }
 
 class NetherManager;
 
 class NetherCynaraBackend : public NetherPolicyBackend
 {
-    public:
-        NetherCynaraBackend(const NetherConfig &netherConfig);
-        ~NetherCynaraBackend();
-        const bool initialize();
-        const bool isValid();
-        const bool enqueueVerdict (const NetherPacket &packet);
-        const bool processEvents();
-        const int getDescriptor();
-        const NetherDescriptorStatus getDescriptorStatus();
-        void setCynaraDescriptor(const int _currentCynaraDescriptor, const NetherDescriptorStatus _currentCynaraDescriptorStatus);
-        void setCynaraVerdict(cynara_check_id checkId, int cynaraResult);
-        static void statusCallback(int oldFd, int newFd, cynara_async_status status, void *data);
-        static void checkCallback(cynara_check_id check_id, cynara_async_call_cause cause, int response, void *data);
+	public:
+		NetherCynaraBackend(const NetherConfig &netherConfig);
+		~NetherCynaraBackend();
+		bool initialize();
+		bool enqueueVerdict(const NetherPacket &packet);
+		bool processEvents();
+		int getDescriptor();
+		NetherDescriptorStatus getDescriptorStatus();
+		void setCynaraDescriptor(const int _currentCynaraDescriptor, const NetherDescriptorStatus _currentCynaraDescriptorStatus);
+		void setCynaraVerdict(cynara_check_id checkId, int cynaraResult);
+		static void statusCallback(int oldFd, int newFd, cynara_async_status status, void *data);
+		static void checkCallback(cynara_check_id check_id, cynara_async_call_cause cause, int response, void *data);
 
-    private:
-        cynara_async *cynaraContext;
-        NetherDescriptorStatus currentCynaraDescriptorStatus;
-        int currentCynaraDescriptor;
-        std::vector<u_int32_t> responseQueue;
-        int cynaraLastResult;
+	private:
+		cynara_async *cynaraContext;
+		NetherDescriptorStatus currentCynaraDescriptorStatus;
+		int currentCynaraDescriptor;
+		std::vector<u_int32_t> responseQueue;
+		int cynaraLastResult;
 };
 
 #endif // HAVE_CYNARA

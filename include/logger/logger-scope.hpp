@@ -28,45 +28,46 @@
 #include <string>
 #include <sstream>
 
-namespace logger {
-
-class SStreamWrapper
+namespace logger
 {
-public:
-    operator std::string() const;
 
-    template <typename T>
-    SStreamWrapper& operator<<(const T& b)
-    {
-        this->mSStream << b;
-        return *this;
-    }
+	class SStreamWrapper
+	{
+		public:
+			operator std::string() const;
 
-private:
-    std::ostringstream mSStream;
-};
+			template <typename T>
+			SStreamWrapper& operator<<(const T& b)
+			{
+				this->mSStream << b;
+				return *this;
+			}
 
-/**
- * Class specifically for scope debug logging. Should be used at the beggining of a scope.
- * Constructor marks scope enterance, destructor marks scope leave.
- */
-class LoggerScope
-{
-public:
-    LoggerScope(const std::string& file,
-                const unsigned int line,
-                const std::string& func,
-                const std::string& message,
-                const std::string& rootDir);
-    ~LoggerScope();
+		private:
+			std::ostringstream mSStream;
+	};
 
-private:
-    const std::string mFile;
-    const unsigned int mLine;
-    const std::string mFunc;
-    const std::string mMessage;
-    const std::string mRootDir;
-};
+	/**
+	 * Class specifically for scope debug logging. Should be used at the beggining of a scope.
+	 * Constructor marks scope enterance, destructor marks scope leave.
+	 */
+	class LoggerScope
+	{
+		public:
+			LoggerScope(const std::string& file,
+						const unsigned int line,
+						const std::string& func,
+						const std::string& message,
+						const std::string& rootDir);
+			~LoggerScope();
+
+		private:
+			const std::string mFile;
+			const unsigned int mLine;
+			const std::string mFunc;
+			const std::string mMessage;
+			const std::string mRootDir;
+	};
 
 } // namespace logger
 

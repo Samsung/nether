@@ -28,19 +28,20 @@
 
 #include <fstream>
 
-namespace logger {
-
-void FileBackend::log(LogLevel logLevel,
-                                const std::string& file,
-                                const unsigned int& line,
-                                const std::string& func,
-                                const std::string& message)
+namespace logger
 {
-    std::ofstream out(mfilePath, std::ios::app);
-    out << LogFormatter::getHeader(logLevel, file, line, func);
-    out << message;
-    out << std::endl;
-}
+
+	void FileBackend::log(LogLevel logLevel,
+						  const std::string& file,
+						  const unsigned int& line,
+						  const std::string& func,
+						  const std::string& message)
+	{
+		std::ofstream out(mfilePath, std::ios::app);
+		out << LogFormatter::getHeader(logLevel, file, line, func);
+		out << message;
+		out << std::endl;
+	}
 
 
 } // namespace logger

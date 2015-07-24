@@ -25,36 +25,39 @@
 #include "logger/logger-scope.hpp"
 #include "logger/logger.hpp"
 
-namespace logger {
-
-SStreamWrapper::operator std::string() const
+namespace logger
 {
-    return mSStream.str();
-}
 
-LoggerScope::LoggerScope(const std::string& file,
-                         const unsigned int line,
-                         const std::string& func,
-                         const std::string& message,
-                         const std::string& rootDir):
-        mFile(file),
-        mLine(line),
-        mFunc(func),
-        mMessage(message),
-        mRootDir(rootDir)
-{
-    if (logger::Logger::getLogLevel() <= logger::LogLevel::TRACE) {
-        logger::Logger::logMessage(logger::LogLevel::TRACE, "Entering: " + mMessage,
-                                   mFile, mLine, mFunc, mRootDir);
-    }
-}
+	SStreamWrapper::operator std::string() const
+	{
+		return mSStream.str();
+	}
 
-LoggerScope::~LoggerScope()
-{
-    if (logger::Logger::getLogLevel() <= logger::LogLevel::TRACE) {
-        logger::Logger::logMessage(logger::LogLevel::TRACE, "Leaving:  " + mMessage,
-                                   mFile, mLine, mFunc, mRootDir);
-    }
-}
+	LoggerScope::LoggerScope(const std::string& file,
+							 const unsigned int line,
+							 const std::string& func,
+							 const std::string& message,
+							 const std::string& rootDir):
+		mFile(file),
+		mLine(line),
+		mFunc(func),
+		mMessage(message),
+		mRootDir(rootDir)
+	{
+		if(logger::Logger::getLogLevel() <= logger::LogLevel::TRACE)
+		{
+			logger::Logger::logMessage(logger::LogLevel::TRACE, "Entering: " + mMessage,
+									   mFile, mLine, mFunc, mRootDir);
+		}
+	}
+
+	LoggerScope::~LoggerScope()
+	{
+		if(logger::Logger::getLogLevel() <= logger::LogLevel::TRACE)
+		{
+			logger::Logger::logMessage(logger::LogLevel::TRACE, "Leaving:  " + mMessage,
+									   mFile, mLine, mFunc, mRootDir);
+		}
+	}
 
 } // namespace logger

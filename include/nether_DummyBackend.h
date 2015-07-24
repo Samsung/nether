@@ -29,30 +29,25 @@
 
 class NetherDummyBackend : public NetherPolicyBackend
 {
-    public:
-        NetherDummyBackend(const NetherConfig &netherConfig)
-            : NetherPolicyBackend(netherConfig) {}
-        ~NetherDummyBackend() {}
+	public:
+		NetherDummyBackend(const NetherConfig &netherConfig)
+			: NetherPolicyBackend(netherConfig) {}
+		~NetherDummyBackend() {}
 
-        const bool isValid()
-        {
-            return (true);
-        }
+		bool initialize()
+		{
+			return (true);
+		}
 
-        const bool initialize()
-        {
-            return (true);
-        }
+		bool enqueueVerdict(const NetherPacket &packet)
+		{
+			return (castVerdict(packet, netherConfig.defaultVerdict));
+		}
 
-        const bool enqueueVerdict(const NetherPacket &packet)
-        {
-            return (castVerdict (packet, netherConfig.defaultVerdict));
-        }
-
-        const bool processEvents()
-        {
-            return (true);
-        }
+		bool processEvents()
+		{
+			return (true);
+		}
 };
 
 #endif

@@ -36,24 +36,26 @@
 #define PROJECT_SOURCE_DIR ""
 #endif
 
-namespace logger {
+namespace logger
+{
 
-class LogBackend;
+	class LogBackend;
 
-class Logger {
-public:
-    static void logMessage(LogLevel logLevel,
-                           const std::string& message,
-                           const std::string& file,
-                           const unsigned int line,
-                           const std::string& func,
-                           const std::string& rootDir);
+	class Logger
+	{
+		public:
+			static void logMessage(LogLevel logLevel,
+								   const std::string& message,
+								   const std::string& file,
+								   const unsigned int line,
+								   const std::string& func,
+								   const std::string& rootDir);
 
-    static void setLogLevel(const LogLevel level);
-    static void setLogLevel(const std::string& level);
-    static LogLevel getLogLevel(void);
-    static void setLogBackend(LogBackend* pBackend);
-};
+			static void setLogLevel(const LogLevel level);
+			static void setLogLevel(const std::string& level);
+			static LogLevel getLogLevel(void);
+			static void setLogBackend(LogBackend* pBackend);
+	};
 
 } // namespace logger
 

@@ -27,19 +27,21 @@
 
 #include "logger/backend.hpp"
 
-namespace logger {
+namespace logger
+{
 
-class FileBackend : public LogBackend {
-public:
-    FileBackend(const std::string &filePath) : mfilePath(filePath) {}
-    void log(LogLevel logLevel,
-             const std::string& file,
-             const unsigned int& line,
-             const std::string& func,
-             const std::string& message) override;
-private:
-    std::string mfilePath;
-};
+	class FileBackend : public LogBackend
+	{
+		public:
+			FileBackend(const std::string &filePath) : mfilePath(filePath) {}
+			void log(LogLevel logLevel,
+					 const std::string& file,
+					 const unsigned int& line,
+					 const std::string& func,
+					 const std::string& message) override;
+		private:
+			std::string mfilePath;
+	};
 
 } // namespace logger
 

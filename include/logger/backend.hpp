@@ -29,20 +29,22 @@
 
 #include <string>
 
-namespace logger {
+namespace logger
+{
 
-/**
- * Abstract class for logger
- */
-class LogBackend {
-public:
-    virtual void log(LogLevel logLevel,
-                     const std::string& file,
-                     const unsigned int& line,
-                     const std::string& func,
-                     const std::string& message) = 0;
-    virtual ~LogBackend() {}
-};
+	/**
+	 * Abstract class for logger
+	 */
+	class LogBackend
+	{
+		public:
+			virtual void log(LogLevel logLevel,
+							 const std::string& file,
+							 const unsigned int& line,
+							 const std::string& func,
+							 const std::string& message) = 0;
+			virtual ~LogBackend() {}
+	};
 
 } // namespace logger
 

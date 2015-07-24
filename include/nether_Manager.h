@@ -32,34 +32,34 @@
 
 class NetherManager : public NetherVerdictListener, public NetherProcessedPacketListener
 {
-    public:
-        NetherManager(const NetherConfig &_netherConfig);
-        ~NetherManager();
-        const bool initialize();
-        const bool process();
-        NetherConfig &getConfig();
-        static NetherPolicyBackend *getPolicyBackend(const NetherConfig &netherConfig, const bool primary = true);
-        bool verdictCast (const u_int32_t packetId, const NetherVerdict verdict);
-        void packetReceived (const NetherPacket &packet);
-        const bool restoreRules();
+	public:
+		NetherManager(const NetherConfig &_netherConfig);
+		~NetherManager();
+		bool initialize();
+		bool process();
+		NetherConfig &getConfig();
+		static NetherPolicyBackend *getPolicyBackend(const NetherConfig &netherConfig, const bool primary = true);
+		bool verdictCast(const u_int32_t packetId, const NetherVerdict verdict);
+		void packetReceived(const NetherPacket &packet);
+		bool restoreRules();
 
-    private:
-        static const bool isCommandAvailable(const std::string &command);
-        void handleSignal();
-        const bool handleNetlinkpacket();
-        void setupSelectSockets(fd_set &watchedReadDescriptorsSet, fd_set &watchedWriteDescriptorsSet, struct timeval &timeoutSpecification);
-        std::unique_ptr <NetherPolicyBackend> netherPrimaryPolicyBackend;
-        std::unique_ptr <NetherPolicyBackend> netherBackupPolicyBackend;
-        std::unique_ptr <NetherPolicyBackend> netherFallbackPolicyBackend;
-        std::unique_ptr <NetherNetlink> netherNetlink;
-        NetherConfig netherConfig;
-        int netlinkDescriptor;
-        int backendDescriptor;
-        int signalDescriptor;
+	private:
+		static bool isCommandAvailable(const std::string &command);
+		void handleSignal();
+		bool handleNetlinkpacket();
+		void setupSelectSockets(fd_set &watchedReadDescriptorsSet, fd_set &watchedWriteDescriptorsSet, struct timeval &timeoutSpecification);
+		std::unique_ptr <NetherPolicyBackend> netherPrimaryPolicyBackend;
+		std::unique_ptr <NetherPolicyBackend> netherBackupPolicyBackend;
+		std::unique_ptr <NetherPolicyBackend> netherFallbackPolicyBackend;
+		std::unique_ptr <NetherNetlink> netherNetlink;
+		NetherConfig netherConfig;
+		int netlinkDescriptor;
+		int backendDescriptor;
+		int signalDescriptor;
 #ifdef HAVE_AUDIT
-        int auditDescriptor;
+		int auditDescriptor;
 #endif // HAVE_AUDIT
-        sigset_t signalMask;
+		sigset_t signalMask;
 };
 
 #endif

@@ -22,168 +22,171 @@
  * @brief   utility functions
  */
 
-
 #ifndef NETHER_UTILS_H
 #define NETHER_UTILS_H
+
 #include "nether_Types.h"
 void decodePacket(NetherPacket &packet, unsigned char *payload);
 void decodeIPv4Packet(NetherPacket &packet, unsigned char *payload);
 void decodeIPv6Packet(NetherPacket &packet, unsigned char *payload);
 void decodeTcp(NetherPacket &packet, unsigned char *payload);
 void decodeUdp(NetherPacket &packet, unsigned char *payload);
-const std::string ipAddressToString(const char *src, enum NetherProtocolType type);
+std::string ipAddressToString(const char *src, enum NetherProtocolType type);
 
-template <typename Type>
-inline void deleteAndZero (Type& pointer)                           { delete pointer; pointer = nullptr; }
-
-static const NetherVerdict stringToVerdict (char *verdictAsString)
+static NetherVerdict stringToVerdict(char *verdictAsString)
 {
-    if (verdictAsString)
-    {
-        if (strncasecmp (verdictAsString, "allow_log", 9) == 0)
-            return (NetherVerdict::allowAndLog);
-        if (strncasecmp (verdictAsString, "allow", 6) == 0)
-            return (NetherVerdict::allow);
-        if (strncasecmp (verdictAsString, "deny", 4) == 0)
-            return (NetherVerdict::deny);
-    }
-    return (NetherVerdict::allowAndLog);
+	if(verdictAsString)
+	{
+		if(strncasecmp(verdictAsString, "allow_log", 9) == 0)
+			return (NetherVerdict::allowAndLog);
+		if(strncasecmp(verdictAsString, "allow", 6) == 0)
+			return (NetherVerdict::allow);
+		if(strncasecmp(verdictAsString, "deny", 4) == 0)
+			return (NetherVerdict::deny);
+	}
+	return (NetherVerdict::allowAndLog);
 }
 
-static const NetherPolicyBackendType stringToBackendType (char *backendAsString)
+static NetherPolicyBackendType stringToBackendType(char *backendAsString)
 {
-    if (strcasecmp (backendAsString, "cynara") == 0)
-      return (NetherPolicyBackendType::cynaraBackend);
-    if (strcasecmp (backendAsString, "file") == 0)
-      return (NetherPolicyBackendType::fileBackend);
-    if (strcasecmp (backendAsString, "dummy") == 0)
-      return (NetherPolicyBackendType::dummyBackend);
+	if(strcasecmp(backendAsString, "cynara") == 0)
+		return (NetherPolicyBackendType::cynaraBackend);
+	if(strcasecmp(backendAsString, "file") == 0)
+		return (NetherPolicyBackendType::fileBackend);
+	if(strcasecmp(backendAsString, "dummy") == 0)
+		return (NetherPolicyBackendType::dummyBackend);
 
-    return (NetherPolicyBackendType::dummyBackend);
+	return (NetherPolicyBackendType::dummyBackend);
 }
 
-static const NetherLogBackendType stringToLogBackendType(char *backendAsString)
+static NetherLogBackendType stringToLogBackendType(char *backendAsString)
 {
-    if (strcasecmp (backendAsString, "stderr") == 0)
-      return (NetherLogBackendType::stderrBackend);
-    if (strcasecmp (backendAsString, "syslog") == 0)
-      return (NetherLogBackendType::syslogBackend);
-    if (strcasecmp (backendAsString, "journal") == 0)
-      return (NetherLogBackendType::journalBackend);
-    if (strcasecmp (backendAsString, "file") == 0)
-      return (NetherLogBackendType::logfileBackend);
-    if (strcasecmp (backendAsString, "null") == 0)
-      return (NetherLogBackendType::nullBackend);
+	if(strcasecmp(backendAsString, "stderr") == 0)
+		return (NetherLogBackendType::stderrBackend);
+	if(strcasecmp(backendAsString, "syslog") == 0)
+		return (NetherLogBackendType::syslogBackend);
+	if(strcasecmp(backendAsString, "journal") == 0)
+		return (NetherLogBackendType::journalBackend);
+	if(strcasecmp(backendAsString, "file") == 0)
+		return (NetherLogBackendType::logfileBackend);
+	if(strcasecmp(backendAsString, "null") == 0)
+		return (NetherLogBackendType::nullBackend);
 
-    return (NetherLogBackendType::nullBackend);
+	return (NetherLogBackendType::nullBackend);
 }
 
-static const std::string logBackendTypeToString(const NetherLogBackendType backendType)
+static std::string logBackendTypeToString(const NetherLogBackendType backendType)
 {
-    switch (backendType)
-    {
-        case NetherLogBackendType::stderrBackend:
-            return ("stderr");
-        case NetherLogBackendType::syslogBackend:
-            return ("syslog");
-        case NetherLogBackendType::journalBackend:
-            return ("journal");
-        case NetherLogBackendType::logfileBackend:
-            return ("file");
-        case NetherLogBackendType::nullBackend:
-            return ("null");
-    }
-    return ("null");
+	switch(backendType)
+	{
+		case NetherLogBackendType::stderrBackend:
+			return ("stderr");
+		case NetherLogBackendType::syslogBackend:
+			return ("syslog");
+		case NetherLogBackendType::journalBackend:
+			return ("journal");
+		case NetherLogBackendType::logfileBackend:
+			return ("file");
+		case NetherLogBackendType::nullBackend:
+			return ("null");
+	}
+	return ("null");
 }
 
-static const std::string backendTypeToString (const NetherPolicyBackendType backendType)
+static std::string backendTypeToString(const NetherPolicyBackendType backendType)
 {
-    switch (backendType)
-    {
-        case NetherPolicyBackendType::cynaraBackend:
-            return ("cynara");
-        case NetherPolicyBackendType::fileBackend:
-            return ("file");
-        case NetherPolicyBackendType::dummyBackend:
-        default:
-            return ("dummy");
-    }
+	switch(backendType)
+	{
+		case NetherPolicyBackendType::cynaraBackend:
+			return ("cynara");
+		case NetherPolicyBackendType::fileBackend:
+			return ("file");
+		case NetherPolicyBackendType::dummyBackend:
+		default:
+			return ("dummy");
+	}
 }
 
-static const std::string verdictToString (const NetherVerdict verdict)
+static std::string verdictToString(const NetherVerdict verdict)
 {
-    switch (verdict)
-    {
-        case NetherVerdict::allow:
-            return ("ALLOW");
-        case NetherVerdict::allowAndLog:
-            return ("ALLOW_LOG");
-        case NetherVerdict::deny:
-            return ("DENY");
-    }
+	switch(verdict)
+	{
+		case NetherVerdict::allow:
+			return ("ALLOW");
+		case NetherVerdict::allowAndLog:
+			return ("ALLOW_LOG");
+		case NetherVerdict::deny:
+			return ("DENY");
+		case NetherVerdict::noVerdictYet:
+			return ("NO_VERDICT_YET");
+	}
+	return ("NO_VERDICT_YET");
 }
 
-static const std::string transportToString(const NetherTransportType transportType)
+static std::string transportToString(const NetherTransportType transportType)
 {
-    switch (transportType)
-    {
-        case NetherTransportType::TCP:
-            return ("TCP");
-        case NetherTransportType::UDP:
-            return ("UDP");
-        case NetherTransportType::ICMP:
-            return ("ICMP");
-        case NetherTransportType::IGMP:
-            return ("IGMP");
-        case NetherTransportType::unknownTransportType:
-        default:
-            return ("UNKNOWN");
-    }
+	switch(transportType)
+	{
+		case NetherTransportType::TCP:
+			return ("TCP");
+		case NetherTransportType::UDP:
+			return ("UDP");
+		case NetherTransportType::ICMP:
+			return ("ICMP");
+		case NetherTransportType::IGMP:
+			return ("IGMP");
+		case NetherTransportType::unknownTransportType:
+		default:
+			return ("UNKNOWN");
+	}
 }
 
-static const std::string protocolToString(const NetherProtocolType protocolType)
+static std::string protocolToString(const NetherProtocolType protocolType)
 {
-    switch (protocolType)
-    {
-        case NetherProtocolType::IPv4:
-            return ("IPv4");
-        case NetherProtocolType::IPv6:
-            return ("IPv6");
-        default:
-            return ("UNKNOWN");
-    }
+	switch(protocolType)
+	{
+		case NetherProtocolType::IPv4:
+			return ("IPv4");
+		case NetherProtocolType::IPv6:
+			return ("IPv6");
+		default:
+			return ("UNKNOWN");
+	}
 }
 
-static const std::string packetToString (const NetherPacket &packet)
+static std::string packetToString(const NetherPacket &packet)
 {
-    std::stringstream stream;
-    stream << "ID=";
-    stream << packet.id;
-    stream << " SECCTX=";
-    stream << packet.securityContext;
-    stream << " UID=";
-    stream << packet.uid;
-    stream << " PROTO=";
-    stream << protocolToString(packet.protocolType);
-    stream << " TRANSPORT=";
-    stream << transportToString(packet.transportType);
-    stream << " SADDR=";
-    stream << ipAddressToString(&packet.localAddress[0], packet.protocolType);
-    stream << ":";
-    stream << packet.localPort;
-    stream << " DADDR=";
-    stream << ipAddressToString(&packet.remoteAddress[0], packet.protocolType);
-    stream << ":";
-    stream << packet.remotePort;
-    return (stream.str());
+	std::stringstream stream;
+	stream << "ID=";
+	stream << packet.id;
+	stream << " SECCTX=";
+	stream << packet.securityContext;
+	stream << " UID=";
+	stream << packet.uid;
+	stream << " GID=";
+	stream << packet.gid;
+	stream << " PROTO=";
+	stream << protocolToString(packet.protocolType);
+	stream << " TRANSPORT=";
+	stream << transportToString(packet.transportType);
+	stream << " SADDR=";
+	stream << ipAddressToString(&packet.localAddress[0], packet.protocolType);
+	stream << ":";
+	stream << packet.localPort;
+	stream << " DADDR=";
+	stream << ipAddressToString(&packet.remoteAddress[0], packet.protocolType);
+	stream << ":";
+	stream << packet.remotePort;
+	return (stream.str());
 }
 
 template<typename ... Args>
-std::string stringFormat( const char* format, Args ... args )
+std::string stringFormat(const char* format, Args ... args)
 {
-    size_t size = snprintf( nullptr, 0, format, args ... ) + 1; // Extra space for '\0'
-    std::unique_ptr<char[]> buf( new char[ size ] );
-    snprintf( buf.get(), size, format, args ... );
-    return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
+	size_t size = snprintf(nullptr, 0, format, args ...) + 1;   // Extra space for '\0'
+	std::unique_ptr<char[]> buf(new char[ size ]);
+	snprintf(buf.get(), size, format, args ...);
+	return std::string(buf.get(), buf.get() + size - 1);   // We don't want the '\0' inside
 }
-#endif
+
+#endif // NETHER_UTILS_H

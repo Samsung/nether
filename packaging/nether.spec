@@ -1,5 +1,4 @@
 Name:		nether
-Epoch:		1
 Version:	0.0.1
 Release:	0
 Source0:	%{name}-%{version}.tar.gz
@@ -7,7 +6,6 @@ License:	Apache-2.0
 Group:		Security/Other
 Summary:	Daemon for enforcing network privileges
 BuildRequires:	cmake
-BuildRequires:	pkgconfig(glib-2.0)
 BuildRequires:	libnetfilter_queue-devel
 BuildRequires:	pkgconfig(cynara-client-async)
 Requires:	iptables
@@ -17,7 +15,7 @@ This is a network privilege enforcing service.
 
 %files
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/nether
+%caps(cap_sys_admin,cap_mac_override=ei) %attr(755,root,root) %{_bindir}/nether
 %dir %{_sysconfdir}/nether
 %config %{_sysconfdir}/nether/nether.policy
 %config %{_sysconfdir}/nether/nether.rules
@@ -40,7 +38,7 @@ This is a network privilege enforcing service.
 	-DBIN_INSTALL_DIR=%{_bindir} \
 	-DSYSCONF_INSTALL_DIR=%{_sysconfdir}
 
-make -k %{?jobs:-j%jobs}
+make %{?_smp_mflags}
 
 %install
 %make_install
@@ -50,11 +48,13 @@ rm -rf %{buildroot}
 
 %post
 # Refresh systemd services list after installation
+systemctl daemon-reload || :
 if [ $1 == 1 ]; then
-	systemctl daemon-reload || :
+	systemctl start nether.service || :
 fi
-# set needed caps on the binary to allow restart without loosing them
-setcap CAP_SYS_ADMIN,CAP_MAC_OVERRIDE+ei %{_bindir}/nether
+if [ $1 == 2 ]; then
+	systemct restart nether.service || :
+fi
 
 %preun
 # Stop the service before uninstall

@@ -27,22 +27,24 @@
 
 #include "logger/backend.hpp"
 
-namespace logger {
+namespace logger
+{
 
-/**
- * Stderr logging backend
- */
-class StderrBackend : public LogBackend {
-public:
-    StderrBackend(const bool _useColours=true) : useColours(_useColours) {}
-    void log(LogLevel logLevel,
-             const std::string& file,
-             const unsigned int& line,
-             const std::string& func,
-             const std::string& message) override;
-private:
-    bool useColours;
-};
+	/**
+	 * Stderr logging backend
+	 */
+	class StderrBackend : public LogBackend
+	{
+		public:
+			StderrBackend(const bool _useColours=true) : useColours(_useColours) {}
+			void log(LogLevel logLevel,
+					 const std::string& file,
+					 const unsigned int& line,
+					 const std::string& func,
+					 const std::string& message) override;
+		private:
+			bool useColours;
+	};
 
 } // namespace logger
 

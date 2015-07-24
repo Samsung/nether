@@ -29,21 +29,23 @@
 
 #include <string>
 
-namespace logger {
+namespace logger
+{
 
-class LogFormatter {
-public:
-    static unsigned int getCurrentThread(void);
-    static std::string getCurrentTime(void);
-    static std::string getConsoleColor(LogLevel logLevel);
-    static std::string getDefaultConsoleColor(void);
-    static std::string stripProjectDir(const std::string& file,
-                                       const std::string& rootDir);
-    static std::string getHeader(LogLevel logLevel,
-                                 const std::string& file,
-                                 const unsigned int& line,
-                                 const std::string& func);
-};
+	class LogFormatter
+	{
+		public:
+			static unsigned int getCurrentThread(void);
+			static std::string getCurrentTime(void);
+			static std::string getConsoleColor(LogLevel logLevel);
+			static std::string getDefaultConsoleColor(void);
+			static std::string stripProjectDir(const std::string& file,
+											   const std::string& rootDir);
+			static std::string getHeader(LogLevel logLevel,
+										 const std::string& file,
+										 const unsigned int& line,
+										 const std::string& func);
+	};
 
 } // namespace logger
 

@@ -27,28 +27,30 @@
 
 #include <string>
 
-namespace logger {
+namespace logger
+{
 
-enum class LogLevel {
-    TRACE,
-    DEBUG,
-    INFO,
-    WARN,
-    ERROR,
-    HELP
-};
+	enum class LogLevel
+	{
+		TRACE,
+		DEBUG,
+		INFO,
+		WARN,
+		ERROR,
+		HELP
+	};
 
-/**
- * @param logLevel LogLevel
- * @return std::sting representation of the LogLevel value
- */
-std::string toString(const LogLevel logLevel);
+	/**
+	 * @param logLevel LogLevel
+	 * @return std::sting representation of the LogLevel value
+	 */
+	std::string toString(const LogLevel logLevel);
 
-/**
- * @param level string representation of log level
- * @return parsed LogLevel value
- */
-LogLevel parseLogLevel(const std::string& level);
+	/**
+	 * @param level string representation of log level
+	 * @return parsed LogLevel value
+	 */
+	LogLevel parseLogLevel(const std::string& level);
 
 } // namespace logger
 

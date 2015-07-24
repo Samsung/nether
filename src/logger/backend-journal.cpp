@@ -28,45 +28,48 @@
 #define SD_JOURNAL_SUPPRESS_LOCATION
 #include <systemd/sd-journal.h>
 
-namespace logger {
-
-namespace {
-
-inline int toJournalPriority(LogLevel logLevel)
+namespace logger
 {
-    switch (logLevel) {
-    case LogLevel::ERROR:
-        return LOG_ERR;     // 3
-    case LogLevel::WARN:
-        return LOG_WARNING; // 4
-    case LogLevel::INFO:
-        return LOG_INFO;    // 6
-    case LogLevel::DEBUG:
-        return LOG_DEBUG;   // 7
-    case LogLevel::TRACE:
-        return LOG_DEBUG;   // 7
-    case LogLevel::HELP:
-        return LOG_DEBUG;   // 7
-    default:
-        return LOG_DEBUG;   // 7
-    }
-}
 
-} // namespace
+	namespace
+	{
 
-void SystemdJournalBackend::log(LogLevel logLevel,
-                                const std::string& file,
-                                const unsigned int& line,
-                                const std::string& func,
-                                const std::string& message)
-{
-    sd_journal_send("PRIORITY=%d", toJournalPriority(logLevel),
-                    "CODE_FILE=%s", file.c_str(),
-                    "CODE_LINE=%d", line,
-                    "CODE_FUNC=%s", func.c_str(),
-                    "MESSAGE=%s", message.c_str(),
-                    NULL);
-}
+		inline int toJournalPriority(LogLevel logLevel)
+		{
+			switch(logLevel)
+			{
+				case LogLevel::ERROR:
+					return LOG_ERR;     // 3
+				case LogLevel::WARN:
+					return LOG_WARNING; // 4
+				case LogLevel::INFO:
+					return LOG_INFO;    // 6
+				case LogLevel::DEBUG:
+					return LOG_DEBUG;   // 7
+				case LogLevel::TRACE:
+					return LOG_DEBUG;   // 7
+				case LogLevel::HELP:
+					return LOG_DEBUG;   // 7
+				default:
+					return LOG_DEBUG;   // 7
+			}
+		}
+
+	} // namespace
+
+	void SystemdJournalBackend::log(LogLevel logLevel,
+									const std::string& file,
+									const unsigned int& line,
+									const std::string& func,
+									const std::string& message)
+	{
+		sd_journal_send("PRIORITY=%d", toJournalPriority(logLevel),
+						"CODE_FILE=%s", file.c_str(),
+						"CODE_LINE=%d", line,
+						"CODE_FUNC=%s", func.c_str(),
+						"MESSAGE=%s", message.c_str(),
+						NULL);
+	}
 
 } // namespace logger
 #endif // HAVE_SYSTEMD_JOURNAL

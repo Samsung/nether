@@ -44,12 +44,14 @@
 #include <getopt.h>
 #include <assert.h>
 #include <netinet/in.h>
+#include <netdb.h>
+#include <linux/types.h>
 #include <sys/signalfd.h>
 #include <linux/types.h>
 #include <linux/netfilter.h>
 
 #if defined(HAVE_AUDIT)
-  #include <libaudit.h>
+#include <libaudit.h>
 #endif // HAVE_AUDIT
 
 #include <libnetfilter_queue/libnetfilter_queue.h>
@@ -59,15 +61,15 @@
 #include "logger/backend-syslog.hpp"
 
 #if defined(HAVE_SYSTEMD_JOURNAL)
-  #include "logger/backend-journal.hpp"
+#include "logger/backend-journal.hpp"
 #endif // HAVE_SYSTEMD_JOURNAL
 
 #if defined(HAVE_CYNARA)
- #define NETHER_PRIMARY_BACKEND          NetherPolicyBackendType::cynaraBackend
- #define NETHER_BACKUP_BACKEND           NetherPolicyBackendType::fileBackend
+#define NETHER_PRIMARY_BACKEND          NetherPolicyBackendType::cynaraBackend
+#define NETHER_BACKUP_BACKEND           NetherPolicyBackendType::fileBackend
 #else
- #define NETHER_PRIMARY_BACKEND          fileBackend
- #define NETHER_BACKUP_BACKEND           dummyBackend
+#define NETHER_PRIMARY_BACKEND          fileBackend
+#define NETHER_BACKUP_BACKEND           dummyBackend
 #endif // HAVE_CYNARA
 
 #define NETHER_DEFAULT_VERDICT          NetherVerdict::allowAndLog
@@ -83,159 +85,164 @@
 #define NETHER_LOG_BACKEND              NetherLogBackendType::stderrBackend
 #define NETHER_IPTABLES_RESTORE_PATH    "/usr/sbin/iptables-restore"
 #ifndef NETHER_RULES_PATH
-  #define NETHER_RULES_PATH             "/etc/nether/nether.rules"
+#define NETHER_RULES_PATH             "/etc/nether/nether.rules"
 #endif // NETHER_RULES_PATH
 
 #ifndef NETHER_POLICY_FILE
-  #define NETHER_POLICY_FILE            "/etc/nether/nether.policy"
+#define NETHER_POLICY_FILE            "/etc/nether/nether.policy"
 #endif // NETHER_POLICY_FILE
 
 enum class NetherPolicyBackendType : std::uint8_t
 {
-    cynaraBackend,
-    fileBackend,
-    dummyBackend
+	cynaraBackend,
+	fileBackend,
+	dummyBackend
 };
 
 enum class NetherLogBackendType : std::uint8_t
 {
-    stderrBackend,
-    syslogBackend,
-    journalBackend,
-    logfileBackend,
-    nullBackend
+	stderrBackend,
+	syslogBackend,
+	journalBackend,
+	logfileBackend,
+	nullBackend
 };
 
 enum class NetherVerdict : std::uint8_t
 {
-    allow,
-    allowAndLog,
-    deny,
-    noVerdictYet
+	allow,
+	allowAndLog,
+	deny,
+	noVerdictYet
 };
 
 enum class NetherDescriptorStatus : std::uint8_t
 {
-    readOnly,
-    writeOnly,
-    readWrite,
-    unknownStatus
+	readOnly,
+	writeOnly,
+	readWrite,
+	unknownStatus
 };
 
 enum class NetherTransportType : std::uint8_t
 {
-    TCP,
-    UDP,
-    ICMP,
-    IGMP,
-    unknownTransportType
+	TCP,
+	UDP,
+	ICMP,
+	IGMP,
+	unknownTransportType
 };
 
 enum class NetherProtocolType : std::uint8_t
 {
-    IPv4,
-    IPv6,
-    unknownProtocolType
+	IPv4,
+	IPv6,
+	unknownProtocolType
 };
 
 
 struct NetherPacket
 {
-    u_int32_t id;
-    std::string securityContext;
-    uid_t uid;
-    gid_t gid;
-    pid_t pid;
-    NetherTransportType transportType;
-    NetherProtocolType protocolType;
-    char localAddress[NETHER_NETWORK_ADDR_LEN];
-    int localPort;
-    char remoteAddress[NETHER_NETWORK_ADDR_LEN];
-    int remotePort;
+	uid_t uid;
+	u_int32_t id;
+	std::string securityContext;
+	int remotePort;
+	int localPort;
+	gid_t gid;
+	pid_t pid;
+	char localAddress[NETHER_NETWORK_ADDR_LEN];
+	char remoteAddress[NETHER_NETWORK_ADDR_LEN];
+	NetherTransportType transportType;
+	NetherProtocolType protocolType;
 };
 
 struct NetherConfig
 {
-    NetherVerdict defaultVerdict                = NETHER_DEFAULT_VERDICT;
-    NetherPolicyBackendType primaryBackendType  = NETHER_PRIMARY_BACKEND;
-    NetherPolicyBackendType backupBackendType   = NETHER_BACKUP_BACKEND;
-    NetherLogBackendType logBackend             = NETHER_LOG_BACKEND;
-    int primaryBackendRetries                   = 3;
-    int backupBackendRetries                    = 3;
-    int debugMode                               = 0;
-    int daemonMode                              = 0;
-    int queueNumber                             = 0;
-    std::string backupBackendArgs               = NETHER_POLICY_FILE;
-    std::string primaryBackendArgs;
-    std::string logBackendArgs;
-    std::string rulesPath                       = NETHER_RULES_PATH;
-    std::string iptablesRestorePath             = NETHER_IPTABLES_RESTORE_PATH;
-    uint8_t markDeny                            = NETLINK_DROP_MARK;
-    uint8_t markAllowAndLog                     = NETLINK_ALLOWLOG_MARK;
-    int enableAudit                             = 0;
-    int noRules                                 = 0;
+	NetherVerdict defaultVerdict                = NETHER_DEFAULT_VERDICT;
+	NetherPolicyBackendType primaryBackendType  = NETHER_PRIMARY_BACKEND;
+	NetherPolicyBackendType backupBackendType   = NETHER_BACKUP_BACKEND;
+	NetherLogBackendType logBackend             = NETHER_LOG_BACKEND;
+	uint8_t markDeny                            = NETLINK_DROP_MARK;
+	uint8_t markAllowAndLog                     = NETLINK_ALLOWLOG_MARK;
+	int primaryBackendRetries                   = 3;
+	int backupBackendRetries                    = 3;
+	int debugMode                               = 0;
+	int daemonMode                              = 0;
+	int queueNumber                             = 0;
+	int enableAudit                             = 0;
+	int noRules                                 = 0;
+	std::string backupBackendArgs               = NETHER_POLICY_FILE;
+	std::string primaryBackendArgs;
+	std::string logBackendArgs;
+	std::string rulesPath                       = NETHER_RULES_PATH;
+	std::string iptablesRestorePath             = NETHER_IPTABLES_RESTORE_PATH;
 };
 
 class NetherVerdictListener
 {
-    public:
-        virtual bool verdictCast (const u_int32_t packetId, const NetherVerdict verdict) = 0;
+	public:
+		virtual bool verdictCast(const u_int32_t packetId, const NetherVerdict verdict) = 0;
 };
 
 class NetherVerdictCaster
 {
-    public:
-        NetherVerdictCaster() : verdictListener(nullptr) {}
-        virtual ~NetherVerdictCaster() {}
+	public:
+		NetherVerdictCaster() : verdictListener(nullptr) {}
+		virtual ~NetherVerdictCaster() {}
 
-        void setListener(NetherVerdictListener *listenerToSet)
-        {
-            verdictListener = listenerToSet;
-        }
+		void setListener(NetherVerdictListener *listenerToSet)
+		{
+			verdictListener = listenerToSet;
+		}
 
-        bool castVerdict (const NetherPacket &packet, const NetherVerdict verdict)
-        {
-            if (verdictListener)
-                return (verdictListener->verdictCast(packet.id, verdict));
-            return (false);
-        }
+		bool castVerdict(const NetherPacket &packet, const NetherVerdict verdict)
+		{
+			if(verdictListener)
+				return (verdictListener->verdictCast(packet.id, verdict));
+			return (false);
+		}
 
-        bool castVerdict (const u_int32_t packetId, const NetherVerdict verdict)
-        {
-            if (verdictListener)
-                return (verdictListener->verdictCast(packetId, verdict));
-            return (false);
-        }
+		bool castVerdict(const u_int32_t packetId, const NetherVerdict verdict)
+		{
+			if(verdictListener)
+				return (verdictListener->verdictCast(packetId, verdict));
+			return (false);
+		}
 
-    protected:
-        NetherVerdictListener *verdictListener;
+	protected:
+		NetherVerdictListener *verdictListener;
 };
 
 class NetherProcessedPacketListener
 {
-    public:
-        virtual void packetReceived (const NetherPacket &packet) = 0;
+	public:
+		virtual void packetReceived(const NetherPacket &packet) = 0;
 };
 
 class NetherPacketProcessor
 {
-    public:
-        NetherPacketProcessor(NetherConfig &_netherConfig) : netherConfig(_netherConfig), packetListener(nullptr) {}
-        virtual ~NetherPacketProcessor() {}
-        virtual const bool reload() { return (true); }
-        void setListener(NetherProcessedPacketListener *listenerToSet)
-        {
-            packetListener = listenerToSet;
-        }
+	public:
+		NetherPacketProcessor(NetherConfig &_netherConfig)
+			: packetListener(nullptr), netherConfig(_netherConfig) {}
+		virtual ~NetherPacketProcessor() {}
+		virtual bool reload()
+		{
+			return (true);
+		}
+		void setListener(NetherProcessedPacketListener *listenerToSet)
+		{
+			packetListener = listenerToSet;
+		}
 
-        void processNetherPacket (NetherPacket packetInfoToWrite)
-        {
-            if (packetListener) packetListener->packetReceived(packetInfoToWrite);
-        }
+		void processNetherPacket(NetherPacket packetInfoToWrite)
+		{
+			if(packetListener) packetListener->packetReceived(packetInfoToWrite);
+		}
 
-        virtual void setVerdict(const NetherPacket &packet, const NetherVerdict verdict) {}
-    protected:
-        NetherProcessedPacketListener *packetListener;
-        NetherConfig netherConfig;
+		virtual void setVerdict(const u_int32_t packetId, const NetherVerdict verdict) = 0;
+
+	protected:
+		NetherProcessedPacketListener *packetListener;
+		NetherConfig netherConfig;
 };
 #endif

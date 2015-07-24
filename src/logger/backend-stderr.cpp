@@ -27,41 +27,44 @@
 #include "logger/formatter.hpp"
 
 #if defined(HAVE_BOOST)
-  #include <boost/tokenizer.hpp>
+#include <boost/tokenizer.hpp>
 #endif
 
-namespace logger {
-
-void StderrBackend::log(LogLevel logLevel,
-                        const std::string& file,
-                        const unsigned int& line,
-                        const std::string& func,
-                        const std::string& message)
+namespace logger
 {
+
+	void StderrBackend::log(LogLevel logLevel,
+							const std::string& file,
+							const unsigned int& line,
+							const std::string& func,
+							const std::string& message)
+	{
 #if defined(HAVE_BOOST)
-    typedef boost::char_separator<char> charSeparator;
-    typedef boost::tokenizer<charSeparator> tokenizer;
+		typedef boost::char_separator<char> charSeparator;
+		typedef boost::tokenizer<charSeparator> tokenizer;
 
-    // example log string
-    // 06:52:35.123 [ERROR] src/util/fs.cpp:43 readFileContent: /file/file.txt is missing
+		// example log string
+		// 06:52:35.123 [ERROR] src/util/fs.cpp:43 readFileContent: /file/file.txt is missing
 
-    const std::string logColor = LogFormatter::getConsoleColor(logLevel);
-    const std::string defaultColor = LogFormatter::getDefaultConsoleColor();
-    const std::string header = LogFormatter::getHeader(logLevel, file, line, func);
-    tokenizer tokens(message, charSeparator("\n"));
-    for (const auto& messageLine : tokens) {
-        if (!messageLine.empty()) {
-            fprintf(stderr,
-                    "%s%s %s%s\n",
-                    useColours ? logColor.c_str() : "",
-                    header.c_str(),
-                    messageLine.c_str(),
-                    useColours ? defaultColor.c_str() : "");
-        }
-    }
+		const std::string logColor = LogFormatter::getConsoleColor(logLevel);
+		const std::string defaultColor = LogFormatter::getDefaultConsoleColor();
+		const std::string header = LogFormatter::getHeader(logLevel, file, line, func);
+		tokenizer tokens(message, charSeparator("\n"));
+		for(const auto& messageLine : tokens)
+		{
+			if(!messageLine.empty())
+			{
+				fprintf(stderr,
+						"%s%s %s%s\n",
+						useColours ? logColor.c_str() : "",
+						header.c_str(),
+						messageLine.c_str(),
+						useColours ? defaultColor.c_str() : "");
+			}
+		}
 #else
-    fprintf (stderr, "%s %s\n", LogFormatter::getHeader(logLevel, file, line, func).c_str(), message.c_str());
+		fprintf(stderr, "%s %s\n", LogFormatter::getHeader(logLevel, file, line, func).c_str(), message.c_str());
 #endif
-}
+	}
 
 } // namespace logger

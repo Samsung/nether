@@ -27,26 +27,29 @@
 
 #include <string>
 
-namespace logger {
+namespace logger
+{
 
-enum class Color : unsigned int {
-    DEFAULT     = 0,
-    BLACK       = 90,
-    RED         = 91,
-    GREEN       = 92,
-    YELLOW      = 93,
-    BLUE        = 94,
-    MAGENTA     = 95,
-    CYAN        = 96,
-    WHITE       = 97
-};
+	enum class Color : unsigned int
+	{
+		DEFAULT     = 0,
+		BLACK       = 90,
+		RED         = 91,
+		GREEN       = 92,
+		YELLOW      = 93,
+		BLUE        = 94,
+		MAGENTA     = 95,
+		CYAN        = 96,
+		WHITE       = 97
+	};
 
-enum class Attributes : unsigned int {
-    DEFAULT     = 0,
-    BOLD        = 1
-};
+	enum class Attributes : unsigned int
+	{
+		DEFAULT     = 0,
+		BOLD        = 1
+	};
 
-std::string getConsoleEscapeSequence(Attributes attr, Color color);
+	std::string getConsoleEscapeSequence(Attributes attr, Color color);
 
 } // namespace logger
 
