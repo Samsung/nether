@@ -149,3 +149,12 @@ std::string ipAddressToString(const char *src, enum NetherProtocolType type)
 			return ("(unknown)");
 	}
 }
+
+template<typename ... Args>
+std::string stringFormat(const char* format, Args ... args)
+{
+	size_t size = snprintf(nullptr, 0, format, args ...) + 1;   // Extra space for '\0'
+	std::unique_ptr<char[]> buf(new char[ size ]);
+	snprintf(buf.get(), size, format, args ...);
+	return std::string(buf.get(), buf.get() + size - 1);   // We don't want the '\0' inside
+}

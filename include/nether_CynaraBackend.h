@@ -33,16 +33,7 @@
 
 #define NETHER_CYNARA_INTERNET_PRIVILEGE "http://tizen.org/privilege/internet"
 
-static const std::string cynaraErrorCodeToString(int cynaraErrorCode)
-{
-	char errorString[512];
-	int ret;
-
-	if((ret = cynara_strerror(cynaraErrorCode, errorString, 512)) == CYNARA_API_SUCCESS)
-		return (std::string(errorString, strlen(errorString)));
-	else
-		return ("Failed to get error string representation, code="+ret);
-}
+const std::string cynaraErrorCodeToString(int cynaraErrorCode);
 
 class NetherManager;
 

@@ -26,6 +26,17 @@
 
 #ifdef HAVE_CYNARA
 
+const std::string cynaraErrorCodeToString(int cynaraErrorCode)
+{
+	char errorString[512];
+	int ret;
+
+	if((ret = cynara_strerror(cynaraErrorCode, errorString, 512)) == CYNARA_API_SUCCESS)
+		return (std::string(errorString, strlen(errorString)));
+	else
+		return ("Failed to get error string representation, code="+ret);
+}
+
 NetherCynaraBackend::NetherCynaraBackend(const NetherConfig &netherConfig)
 	:   NetherPolicyBackend(netherConfig), currentCynaraDescriptor(0),
 		cynaraLastResult(CYNARA_API_UNKNOWN_ERROR)
@@ -77,7 +88,11 @@ bool NetherCynaraBackend::enqueueVerdict(const NetherPacket &packet)
 {
 	cynara_check_id checkId;
 
-	cynaraLastResult = cynara_async_check_cache(cynaraContext, packet.securityContext.c_str(), "", std::to_string(packet.uid).c_str(), NETHER_CYNARA_INTERNET_PRIVILEGE);
+	cynaraLastResult = cynara_async_check_cache(cynaraContext,
+												packet.securityContext.c_str(),
+												"",
+												std::to_string(packet.uid).c_str(),
+												NETHER_CYNARA_INTERNET_PRIVILEGE);
 
 	LOGD("cynara_async_check_cache ctx=" << packet.securityContext.c_str() << " user=" << std::to_string(packet.uid).c_str() << " privilege=" << NETHER_CYNARA_INTERNET_PRIVILEGE);
 
@@ -100,6 +115,7 @@ bool NetherCynaraBackend::enqueueVerdict(const NetherPacket &packet)
 							   &checkId,
 							   &checkCallback,
 							   this);
+
 			if(cynaraLastResult == CYNARA_API_SUCCESS)
 			{
 				responseQueue[checkId] = packet.id;
@@ -128,20 +144,14 @@ bool NetherCynaraBackend::enqueueVerdict(const NetherPacket &packet)
 
 void NetherCynaraBackend::setCynaraVerdict(cynara_check_id checkId, int cynaraResult)
 {
-	u_int32_t packetId = 0;
-	if((packetId = responseQueue[checkId]) >= 0)
-	{
-		responseQueue[checkId] = -1;
+	u_int32_t packetId = responseQueue[checkId];
 
-		if(cynaraResult == CYNARA_API_ACCESS_ALLOWED)
-			castVerdict(packetId, NetherVerdict::allow);
-		else
-			castVerdict(packetId, NetherVerdict::deny);
+	if(cynaraResult == CYNARA_API_ACCESS_ALLOWED)
+		castVerdict(packetId, NetherVerdict::allow);
+	else
+		castVerdict(packetId, NetherVerdict::deny);
 
-		return;
-	}
-
-	LOGW("checkId=" << checkId << " has no assosiated packetId");
+	return;
 }
 
 int NetherCynaraBackend::getDescriptor()

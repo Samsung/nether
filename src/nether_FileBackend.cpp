@@ -24,6 +24,29 @@
 
 #include "nether_FileBackend.h"
 
+const std::string dumpPolicyEntry(const PolicyEntry &entry)
+{
+	std::stringstream stream;
+	stream << "UID=";
+	if(entry.uid == NETHER_INVALID_UID)
+		stream << "*";
+	else
+		stream << entry.uid;
+	stream << " GID=";
+	if(entry.gid == NETHER_INVALID_GID)
+		stream << "*";
+	else stream << entry.gid;
+		stream << " SECCTX=";
+	if(entry.securityContext.empty())
+		stream << "*";
+	else
+		stream << entry.securityContext;
+	stream << " VERDICT=";
+	stream << verdictToString(entry.verdict);
+
+	return (stream.str());
+}
+
 NetherFileBackend::NetherFileBackend(const NetherConfig &netherConfig)
 	: NetherPolicyBackend(netherConfig)
 {
