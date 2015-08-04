@@ -107,7 +107,7 @@ bool NetherFileBackend::parsePolicyFile(std::ifstream &policyFile)
 
 		tokens = split(line, NETHER_POLICY_CREDS_DELIM);
 
-		if(tokens.size() > 0)
+		if(tokens.size() > 0 && tokens.size() > verdictToken)
 		{
 			PolicyEntry entry { tokens[PolicyFileTokens::uidToken].empty() ?
 									NETHER_INVALID_UID :
@@ -121,6 +121,10 @@ bool NetherFileBackend::parsePolicyFile(std::ifstream &policyFile)
 
 			LOGD("\t"<<dumpPolicyEntry(entry).c_str());
 			policy.push_back(entry);
+		}
+		else
+		{
+			LOGW("Malformed policy entry: " + line + " in file: " + netherConfig.backupBackendArgs);
 		}
 	}
 
