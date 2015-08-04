@@ -65,32 +65,40 @@
 #endif // HAVE_SYSTEMD_JOURNAL
 
 #if defined(HAVE_CYNARA)
-#define NETHER_PRIMARY_BACKEND          NetherPolicyBackendType::cynaraBackend
-#define NETHER_BACKUP_BACKEND           NetherPolicyBackendType::fileBackend
+#define NETHER_PRIMARY_BACKEND			NetherPolicyBackendType::cynaraBackend
+#define NETHER_BACKUP_BACKEND			NetherPolicyBackendType::fileBackend
 #else
-#define NETHER_PRIMARY_BACKEND          NetherPolicyBackendType::fileBackend
-#define NETHER_BACKUP_BACKEND           NetherPolicyBackendType::dummyBackend
+#define NETHER_PRIMARY_BACKEND			NetherPolicyBackendType::fileBackend
+#define NETHER_BACKUP_BACKEND			NetherPolicyBackendType::dummyBackend
 #endif // HAVE_CYNARA
 
-#define NETHER_DEFAULT_VERDICT          NetherVerdict::allowAndLog
-#define NETHER_PACKET_BUFFER_SIZE       4096
-#define NETHER_INVALID_UID              (uid_t) -1
-#define NETHER_INVALID_GID              (gid_t) -1
-#define NETHER_NETWORK_ADDR_LEN         16 /* enough to hold ipv4 and ipv6 */
-#define NETHER_NETWORK_IPV4_ADDR_LEN    4
-#define NETHER_NETWORK_IPV6_ADDR_LEN    16
-#define NETHER_MAX_USER_LEN             32
-#define NETLINK_DROP_MARK               3
-#define NETLINK_ALLOWLOG_MARK           4
-#define NETHER_LOG_BACKEND              NetherLogBackendType::stderrBackend
-#define NETHER_IPTABLES_RESTORE_PATH    "/usr/sbin/iptables-restore"
+#if defined(COPY_PACKETS)
+#define NETLINK_COPY_PACKETS			1
+#else
+#define NETLINK_COPY_PACKETS			0
+#endif // COPY_PACKETS
+
 #ifndef NETHER_RULES_PATH
-#define NETHER_RULES_PATH             "/etc/nether/nether.rules"
+#define NETHER_RULES_PATH				"/etc/nether/nether.rules"
 #endif // NETHER_RULES_PATH
 
 #ifndef NETHER_POLICY_FILE
-#define NETHER_POLICY_FILE            "/etc/nether/nether.policy"
+#define NETHER_POLICY_FILE				"/etc/nether/nether.policy"
 #endif // NETHER_POLICY_FILE
+
+
+#define NETHER_DEFAULT_VERDICT			NetherVerdict::allowAndLog
+#define NETHER_PACKET_BUFFER_SIZE		4096
+#define NETHER_INVALID_UID				(uid_t) -1
+#define NETHER_INVALID_GID				(gid_t) -1
+#define NETHER_NETWORK_ADDR_LEN			16 /* enough to hold ipv4 and ipv6 */
+#define NETHER_NETWORK_IPV4_ADDR_LEN	4
+#define NETHER_NETWORK_IPV6_ADDR_LEN	16
+#define NETHER_MAX_USER_LEN				32
+#define NETLINK_DROP_MARK				3
+#define NETLINK_ALLOWLOG_MARK			4
+#define NETHER_LOG_BACKEND				NetherLogBackendType::stderrBackend
+#define NETHER_IPTABLES_RESTORE_PATH	"/usr/sbin/iptables-restore"
 
 enum class NetherPolicyBackendType : std::uint8_t
 {
@@ -158,24 +166,25 @@ struct NetherPacket
 
 struct NetherConfig
 {
-	NetherVerdict defaultVerdict                = NETHER_DEFAULT_VERDICT;
-	NetherPolicyBackendType primaryBackendType  = NETHER_PRIMARY_BACKEND;
-	NetherPolicyBackendType backupBackendType   = NETHER_BACKUP_BACKEND;
-	NetherLogBackendType logBackend             = NETHER_LOG_BACKEND;
-	uint8_t markDeny                            = NETLINK_DROP_MARK;
-	uint8_t markAllowAndLog                     = NETLINK_ALLOWLOG_MARK;
-	int primaryBackendRetries                   = 3;
-	int backupBackendRetries                    = 3;
-	int debugMode                               = 0;
-	int daemonMode                              = 0;
-	int queueNumber                             = 0;
-	int enableAudit                             = 0;
-	int noRules                                 = 0;
-	std::string backupBackendArgs               = NETHER_POLICY_FILE;
+	NetherVerdict defaultVerdict				= NETHER_DEFAULT_VERDICT;
+	NetherPolicyBackendType primaryBackendType	= NETHER_PRIMARY_BACKEND;
+	NetherPolicyBackendType backupBackendType	= NETHER_BACKUP_BACKEND;
+	NetherLogBackendType logBackend				= NETHER_LOG_BACKEND;
+	uint8_t markDeny							= NETLINK_DROP_MARK;
+	uint8_t markAllowAndLog						= NETLINK_ALLOWLOG_MARK;
+	int primaryBackendRetries					= 3;
+	int backupBackendRetries					= 3;
+	int debugMode								= 0;
+	int daemonMode								= 0;
+	int queueNumber								= 0;
+	int enableAudit								= 0;
+	int noRules									= 0;
+	int copyPackets								= NETLINK_COPY_PACKETS;
+	std::string backupBackendArgs				= NETHER_POLICY_FILE;
 	std::string primaryBackendArgs;
 	std::string logBackendArgs;
-	std::string rulesPath                       = NETHER_RULES_PATH;
-	std::string iptablesRestorePath             = NETHER_IPTABLES_RESTORE_PATH;
+	std::string rulesPath						= NETHER_RULES_PATH;
+	std::string iptablesRestorePath				= NETHER_IPTABLES_RESTORE_PATH;
 };
 
 class NetherVerdictListener

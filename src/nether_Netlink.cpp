@@ -68,7 +68,7 @@ bool NetherNetlink::initialize()
 	if(nfq_set_queue_flags(queueHandle, NFQA_CFG_F_SECCTX, NFQA_CFG_F_SECCTX))
 		LOGI("This kernel version does not allow to retrieve security context");
 
-	if(nfq_set_mode(queueHandle, NFQNL_COPY_META, 0xffff) < 0)
+	if(nfq_set_mode(queueHandle, netherConfig.copyPackets ? NFQNL_COPY_PACKET : NFQNL_COPY_META, 0xffff) < 0)
 	{
 		LOGE("Can't set packet_copy mode");
 		nfq_destroy_queue(queueHandle);

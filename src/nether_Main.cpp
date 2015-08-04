@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
 #endif
 		{"daemon",                  no_argument,        &netherConfig.daemonMode,   0},
 		{"no-rules",                no_argument,        &netherConfig.noRules,      0},
+		{"copy-packets",			no_argument,		&netherConfig.copyPackets,	0},
 		{"log",                     required_argument,  0,                          'l'},
 		{"log-args",                required_argument,  0,                          'L'},
 		{"default-verdict",         required_argument,  0,                          'V'},
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, ":daxl:L:V:p:P:b:B:q:m:M:a:r:i:h", longOptions, &optionIndex);
+		c = getopt_long(argc, argv, ":daxcl:L:V:p:P:b:B:q:m:M:a:r:i:h", longOptions, &optionIndex);
 
 		if(c == -1)
 			break;
@@ -73,8 +74,13 @@ int main(int argc, char *argv[])
 			case 'd':
 				netherConfig.daemonMode             = 1;
 				break;
+
 			case 'x':
 				netherConfig.noRules                = 1;
+				break;
+
+			case 'c':
+				netherConfig.copyPackets			= 1;
 				break;
 
 #if defined(HAVE_AUDIT)
@@ -218,6 +224,7 @@ void showHelp(char *arg)
 	cout<< "Usage:\t"<< arg << " [OPTIONS]\n\n";
 	cout<< "  -d,--daemon\t\t\t\tRun as daemon in the background (default:no)\n";
 	cout<< "  -x,--no-rules\t\t\t\tDon't load iptables rules on start (default:no)\n";
+	cout<< "  -c,--copy-packets\t\t\tCopy entire packets, needed to read TCP/IP information (default:no)\n";
 	cout<< "  -l,--log=<backend>\t\t\tSet logging backend STDERR,SYSLOG";
 #if defined(HAVE_SYSTEMD_JOURNAL)
 	cout << ",JOURNAL\n";
