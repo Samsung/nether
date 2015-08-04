@@ -68,8 +68,8 @@
 #define NETHER_PRIMARY_BACKEND          NetherPolicyBackendType::cynaraBackend
 #define NETHER_BACKUP_BACKEND           NetherPolicyBackendType::fileBackend
 #else
-#define NETHER_PRIMARY_BACKEND          fileBackend
-#define NETHER_BACKUP_BACKEND           dummyBackend
+#define NETHER_PRIMARY_BACKEND          NetherPolicyBackendType::fileBackend
+#define NETHER_BACKUP_BACKEND           NetherPolicyBackendType::dummyBackend
 #endif // HAVE_CYNARA
 
 #define NETHER_DEFAULT_VERDICT          NetherVerdict::allowAndLog
