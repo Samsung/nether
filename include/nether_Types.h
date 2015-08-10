@@ -181,10 +181,10 @@ struct NetherConfig
 	int noRules									= 0;
 	int copyPackets								= NETLINK_COPY_PACKETS;
 	std::string backupBackendArgs				= NETHER_POLICY_FILE;
-	std::string primaryBackendArgs;
-	std::string logBackendArgs;
 	std::string rulesPath						= NETHER_RULES_PATH;
 	std::string iptablesRestorePath				= NETHER_IPTABLES_RESTORE_PATH;
+	std::string primaryBackendArgs;
+	std::string logBackendArgs;
 };
 
 class NetherVerdictListener
