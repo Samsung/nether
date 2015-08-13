@@ -152,6 +152,8 @@ std::string packetToString(const NetherPacket &packet)
 	stream << packet.id;
 	stream << " SECCTX=";
 	stream << packet.securityContext;
+	stream << " OUTDEV=";
+	stream << packet.outdevName;
 	stream << " UID=";
 	stream << packet.uid;
 	stream << " GID=";

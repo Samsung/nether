@@ -38,30 +38,31 @@ int main(int argc, char *argv[])
 	static struct option longOptions[] =
 	{
 #if defined(HAVE_AUDIT)
-		{"enable-audit",            no_argument,        &netherConfig.enableAudit,  0},
+		{"enable-audit",            no_argument,        &netherConfig.enableAudit,		0},
 #endif
-		{"daemon",                  no_argument,        &netherConfig.daemonMode,   0},
-		{"no-rules",                no_argument,        &netherConfig.noRules,      0},
-		{"copy-packets",			no_argument,		&netherConfig.copyPackets,	0},
-		{"log",                     required_argument,  0,                          'l'},
-		{"log-args",                required_argument,  0,                          'L'},
-		{"default-verdict",         required_argument,  0,                          'V'},
-		{"primary-backend",         required_argument,  0,                          'p'},
-		{"primary-backend-args",    required_argument,  0,                          'P'},
-		{"backup-backend",          required_argument,  0,                          'b'},
-		{"backup-backend-args",     required_argument,  0,                          'B'},
-		{"queue-num",               required_argument,  0,                          'q'},
-		{"mark-deny",               required_argument,  0,                          'm'},
-		{"mark-allow-log",          required_argument,  0,                          'M'},
-		{"rules-path",              required_argument,  0,                          'r'},
-		{"iptables-restore-path",   required_argument,  0,                          'i'},
-		{"help",                    no_argument,        0,                          'h'},
+		{"daemon",                  no_argument,        &netherConfig.daemonMode,		0},
+		{"no-rules",                no_argument,        &netherConfig.noRules,			0},
+		{"copy-packets",			no_argument,		&netherConfig.copyPackets,		0},
+		{"interface-info",			no_argument,		&netherConfig.interfaceInfo,	0},
+		{"log",                     required_argument,  0,								'l'},
+		{"log-args",                required_argument,  0,								'L'},
+		{"default-verdict",         required_argument,  0,								'V'},
+		{"primary-backend",         required_argument,  0,								'p'},
+		{"primary-backend-args",    required_argument,  0,								'P'},
+		{"backup-backend",          required_argument,  0,								'b'},
+		{"backup-backend-args",     required_argument,  0,								'B'},
+		{"queue-num",               required_argument,  0,								'q'},
+		{"mark-deny",               required_argument,  0,								'm'},
+		{"mark-allow-log",          required_argument,  0,								'M'},
+		{"rules-path",              required_argument,  0,								'r'},
+		{"iptables-restore-path",   required_argument,  0,								'i'},
+		{"help",                    no_argument,        0,								'h'},
 		{0, 0, 0, 0}
 	};
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, ":daxcl:L:V:p:P:b:B:q:m:M:a:r:i:h", longOptions, &optionIndex);
+		c = getopt_long(argc, argv, ":daxcIl:L:V:p:P:b:B:q:m:M:a:r:i:h", longOptions, &optionIndex);
 
 		if(c == -1)
 			break;
@@ -81,6 +82,10 @@ int main(int argc, char *argv[])
 
 			case 'c':
 				netherConfig.copyPackets			= 1;
+				break;
+
+			case 'I':
+				netherConfig.interfaceInfo			= 1;
 				break;
 
 #if defined(HAVE_AUDIT)
@@ -181,21 +186,23 @@ int main(int argc, char *argv[])
 #if defined(_DEBUG)
 		 << " debug"
 #endif
-		 << " daemon="                << netherConfig.daemonMode
-		 << " queue="                 << netherConfig.queueNumber);
-	LOGD("primary-backend="       << backendTypeToString(netherConfig.primaryBackendType)
-		 << " primary-backend-args="  << netherConfig.primaryBackendArgs);
-	LOGD("backup-backend="        << backendTypeToString(netherConfig.backupBackendType)
-		 << " backup-backend-args="   << netherConfig.backupBackendArgs);
-	LOGD("default-verdict="       << verdictToString(netherConfig.defaultVerdict)
-		 << " mark-deny="             << (int)netherConfig.markDeny
-		 << " mark-allow-log="        << (int)netherConfig.markAllowAndLog);
-	LOGD("log-backend="           << logBackendTypeToString(netherConfig.logBackend)
-		 << " log-backend-args="      << netherConfig.logBackendArgs);
-	LOGD("enable-audit="          << (netherConfig.enableAudit ? "yes" : "no")
-		 << " rules-path="            << netherConfig.rulesPath);
-	LOGD("no-rules="              << (netherConfig.noRules ? "yes" : "no")
-		 << " iptables-restore-path=" << netherConfig.iptablesRestorePath);
+		 << " daemon="					<< netherConfig.daemonMode
+		 << " queue="					<< netherConfig.queueNumber);
+	LOGD("primary-backend="				<< backendTypeToString(netherConfig.primaryBackendType)
+		 << " primary-backend-args="	<< netherConfig.primaryBackendArgs);
+	LOGD("backup-backend="				<< backendTypeToString(netherConfig.backupBackendType)
+		 << " backup-backend-args="		<< netherConfig.backupBackendArgs);
+	LOGD("default-verdict="				<< verdictToString(netherConfig.defaultVerdict)
+		 << " mark-deny="				<< (int)netherConfig.markDeny
+		 << " mark-allow-log="			<< (int)netherConfig.markAllowAndLog);
+	LOGD("log-backend="					<< logBackendTypeToString(netherConfig.logBackend)
+		 << " log-backend-args="		<< netherConfig.logBackendArgs);
+	LOGD("enable-audit="				<< (netherConfig.enableAudit ? "yes" : "no")
+		 << " rules-path="				<< netherConfig.rulesPath);
+	LOGD("no-rules="					<< (netherConfig.noRules ? "yes" : "no")
+		 << " iptables-restore-path="	<< netherConfig.iptablesRestorePath);
+	LOGD("interface-info="				<< (netherConfig.interfaceInfo ? "yes" : "no")
+		<< " copy-packets="				<< (netherConfig.copyPackets ? "yes" : "no"));
 
 	NetherManager manager(netherConfig);
 
@@ -207,14 +214,22 @@ int main(int argc, char *argv[])
 
 	if(netherConfig.daemonMode)
 	{
+		LOGD("FORKING TO BACKGROUND");
 		if(!runAsDaemon())
 		{
 			LOGE("Failed to run as daemon: " << strerror(errno));
 			exit(1);
 		}
+		else
+		{
+			manager.process();
+		}
 	}
-
-	manager.process();
+	else
+	{
+		LOGD("RUNNING IF FOREGROUND");
+		manager.process();
+	}
 
 	return (0);
 }
@@ -225,6 +240,7 @@ void showHelp(char *arg)
 	cout<< "  -d,--daemon\t\t\t\tRun as daemon in the background (default:no)\n";
 	cout<< "  -x,--no-rules\t\t\t\tDon't load iptables rules on start (default:no)\n";
 	cout<< "  -c,--copy-packets\t\t\tCopy entire packets, needed to read TCP/IP information (default:no)\n";
+	cout<< "  -I,--interface-info\t\t\tGet interface info for every packet (default:no)\n";
 	cout<< "  -l,--log=<backend>\t\t\tSet logging backend STDERR,SYSLOG";
 #if defined(HAVE_SYSTEMD_JOURNAL)
 	cout << ",JOURNAL\n";

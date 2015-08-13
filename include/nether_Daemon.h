@@ -73,20 +73,5 @@ bool runAsDaemon()
 
 	umask(0);
 
-	/** Close all open file descriptors */
-	for(int x = sysconf(_SC_OPEN_MAX); x>0; x--)
-	{
-		close(x);
-	}
-
-	if(open("/dev/null",O_RDONLY) == -1)
-		return (false);
-
-	if(open("/dev/null",O_WRONLY) == -1)
-		return (false);
-
-	if(open("/dev/null",O_RDWR) == -1)
-		return (false);
-
 	return (true);
 }

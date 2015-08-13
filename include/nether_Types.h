@@ -78,6 +78,8 @@
 #define NETLINK_COPY_PACKETS			0
 #endif // COPY_PACKETS
 
+#define NETLINK_INTERFACE_INFO			0
+
 #ifndef NETHER_RULES_PATH
 #define NETHER_RULES_PATH				"/etc/nether/nether.rules"
 #endif // NETHER_RULES_PATH
@@ -162,6 +164,7 @@ struct NetherPacket
 	char remoteAddress[NETHER_NETWORK_ADDR_LEN];
 	NetherTransportType transportType;
 	NetherProtocolType protocolType;
+	char outdevName[IFNAMSIZ];
 };
 
 struct NetherConfig
@@ -180,6 +183,7 @@ struct NetherConfig
 	int enableAudit								= 0;
 	int noRules									= 0;
 	int copyPackets								= NETLINK_COPY_PACKETS;
+	int interfaceInfo							= NETLINK_INTERFACE_INFO;
 	std::string backupBackendArgs				= NETHER_POLICY_FILE;
 	std::string rulesPath						= NETHER_RULES_PATH;
 	std::string iptablesRestorePath				= NETHER_IPTABLES_RESTORE_PATH;

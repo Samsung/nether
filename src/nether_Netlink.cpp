@@ -82,9 +82,15 @@ bool NetherNetlink::initialize()
 		return (false);
 	}
 
-	nlif = nlif_open();
-	if(!nlif)
-		LOGI("Failed to initialize NLIF subsystem, interface information won't be available");
+	if (netherConfig.interfaceInfo)
+	{
+		nlif = nlif_open();
+
+		if(!nlif)
+			LOGI("Failed to initialize NLIF subsystem, interface information won't be available");
+		else
+			nlif_query(nlif);
+	}
 
 	return (true);
 }
@@ -109,6 +115,26 @@ bool NetherNetlink::processPacket(char *packetBuffer, const int packetReadSize)
 	return (true);
 }
 
+void NetherNetlink::getInterfaceInfo(struct nfq_data *nfa, NetherPacket &netherPacket)
+{
+	if (netherConfig.interfaceInfo)
+	{
+		uint32_t ifi;
+
+        ifi = nfq_get_outdev(nfa);
+
+		if (ifi)
+		{
+                nfq_get_outdev_name(nlif, nfa, netherPacket.outdevName);
+        }
+        else
+		{
+                strncpy(netherPacket.outdevName, "(unknown)", IFNAMSIZ);
+                netherPacket.outdevName[IFNAMSIZ-1] = '\0';
+        }
+	}
+}
+
 int NetherNetlink::callback(struct nfq_q_handle *, struct nfgenmsg *, struct nfq_data *nfa, void *data)
 {
 	NetherNetlink *me = static_cast<NetherNetlink *>(data);
@@ -127,6 +153,9 @@ int NetherNetlink::callback(struct nfq_q_handle *, struct nfgenmsg *, struct nfq
 		LOGI("Failed to get packet id");
 		return (1);
 	}
+
+	/* get interface information if requested */
+	me->getInterfaceInfo(nfa, packet);
 
 	if(nfq_get_uid(nfa, &packet.uid) == 0)
 		LOGW("Failed to get uid for packet id=" << packet.id);
@@ -167,4 +196,9 @@ void NetherNetlink::setVerdict(const u_int32_t packetId, const NetherVerdict ver
 bool NetherNetlink::reload()
 {
 	return (true);
+}
+
+const NetherConfig &NetherNetlink::getNetherConfig()
+{
+	return (netherConfig);
 }

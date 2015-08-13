@@ -41,6 +41,8 @@ class NetherNetlink : public NetherPacketProcessor
 		bool processPacket(char *packetBuffer, const int packetReadSize);
 		void setVerdict(const u_int32_t packetId, const NetherVerdict verdict);
 		int getDescriptor();
+		const NetherConfig &getNetherConfig();
+		void getInterfaceInfo(struct nfq_data *nfa, NetherPacket &netherPacket);
 
 	protected:
 		NetherPacket *processedPacket;
