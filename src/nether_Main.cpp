@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
 		{"no-rules",                no_argument,        &netherConfig.noRules,			0},
 		{"copy-packets",			no_argument,		&netherConfig.copyPackets,		0},
 		{"interface-info",			no_argument,		&netherConfig.interfaceInfo,	0},
+		{"relaxed",					no_argument,		&netherConfig.relaxed,			0},
 		{"log",                     required_argument,  0,								'l'},
 		{"log-args",                required_argument,  0,								'L'},
 		{"default-verdict",         required_argument,  0,								'V'},
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, ":daxcIl:L:V:p:P:b:B:q:m:M:a:r:i:h", longOptions, &optionIndex);
+		c = getopt_long(argc, argv, ":daxcIRl:L:V:p:P:b:B:q:m:M:a:r:i:h", longOptions, &optionIndex);
 
 		if(c == -1)
 			break;
@@ -93,6 +94,10 @@ int main(int argc, char *argv[])
 				netherConfig.enableAudit            = 1;
 				break;
 #endif
+			case 'R':
+				netherConfig.relaxed				= 1;
+				break;
+
 			case 'l':
 				netherConfig.logBackend             = stringToLogBackendType(optarg);
 				break;
@@ -203,6 +208,7 @@ int main(int argc, char *argv[])
 		 << " iptables-restore-path="	<< netherConfig.iptablesRestorePath);
 	LOGD("interface-info="				<< (netherConfig.interfaceInfo ? "yes" : "no")
 		<< " copy-packets="				<< (netherConfig.copyPackets ? "yes" : "no"));
+	LOGD("relaxed="						<< (netherConfig.relaxed ? "yes" : "no"));
 
 	NetherManager manager(netherConfig);
 
@@ -241,6 +247,7 @@ void showHelp(char *arg)
 	cout<< "  -x,--no-rules\t\t\t\tDon't load iptables rules on start (default:no)\n";
 	cout<< "  -c,--copy-packets\t\t\tCopy entire packets, needed to read TCP/IP information (default:no)\n";
 	cout<< "  -I,--interface-info\t\t\tGet interface info for every packet (default:no)\n";
+	cout<< "  -R,--relaxed\t\t\t\tRun in relaxed mode, instrad of deny do ACCEPT_LOG(default:no)\n";
 	cout<< "  -l,--log=<backend>\t\t\tSet logging backend STDERR,SYSLOG";
 #if defined(HAVE_SYSTEMD_JOURNAL)
 	cout << ",JOURNAL\n";
@@ -260,7 +267,7 @@ void showHelp(char *arg)
 #endif
 	cout<< ",FILE,NONE (defualt:"<< backendTypeToString(NETHER_BACKUP_BACKEND)<< ")\n";
 	cout<< "  -B,--backup-backend-args=<arguments>\tBackup policy backend arguments (default:" << NETHER_POLICY_FILE << ")\n";
-	cout<< "  -q,--queue-num=<queue number>\t\tNFQUEUE queue number to use for receiving packets\n";
+	cout<< "  -q,--queue-num=<queue number>\t\tNFQUEUE queue number to use for receiving packets (default:" << NETLINK_QUEUE_NUM << ")\n";
 	cout<< "  -m,--mark-deny=<mark>\t\t\tPacket mark to use for DENY verdicts (default:"<< NETLINK_DROP_MARK << ")\n";
 	cout<< "  -M,--mark-allow-log=<mark>\t\tPacket mark to use for ALLOW_LOG verdicts (default:" << NETLINK_ALLOWLOG_MARK << ")\n";
 #if defined(HAVE_AUDIT)

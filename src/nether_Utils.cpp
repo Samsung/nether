@@ -128,7 +128,7 @@ std::string transportToString(const NetherTransportType transportType)
 			return ("IGMP");
 		case NetherTransportType::unknownTransportType:
 		default:
-			return ("UNKNOWN");
+			return ("(unknown)");
 	}
 }
 
@@ -141,7 +141,7 @@ std::string protocolToString(const NetherProtocolType protocolType)
 		case NetherProtocolType::IPv6:
 			return ("IPv6");
 		default:
-			return ("UNKNOWN");
+			return ("(unknown)");
 	}
 }
 

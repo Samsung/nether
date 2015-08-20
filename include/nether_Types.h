@@ -99,6 +99,7 @@
 #define NETHER_MAX_USER_LEN				32
 #define NETLINK_DROP_MARK				3
 #define NETLINK_ALLOWLOG_MARK			4
+#define NETLINK_QUEUE_NUM				0
 #define NETHER_LOG_BACKEND				NetherLogBackendType::stderrBackend
 #define NETHER_IPTABLES_RESTORE_PATH	"/usr/sbin/iptables-restore"
 
@@ -179,10 +180,11 @@ struct NetherConfig
 	int backupBackendRetries					= 3;
 	int debugMode								= 0;
 	int daemonMode								= 0;
-	int queueNumber								= 0;
+	int queueNumber								= NETLINK_QUEUE_NUM;
 	int enableAudit								= 0;
 	int noRules									= 0;
 	int copyPackets								= NETLINK_COPY_PACKETS;
+	int relaxed									= 0;
 	int interfaceInfo							= NETLINK_INTERFACE_INFO;
 	std::string backupBackendArgs				= NETHER_POLICY_FILE;
 	std::string rulesPath						= NETHER_RULES_PATH;

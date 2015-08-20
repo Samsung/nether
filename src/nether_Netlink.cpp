@@ -184,8 +184,16 @@ void NetherNetlink::setVerdict(const u_int32_t packetId, const NetherVerdict ver
 
 	if(verdict == NetherVerdict::allow)
 		ret = nfq_set_verdict(queueHandle, packetId, NF_ACCEPT, 0, NULL);
+
 	if(verdict == NetherVerdict::deny)
-		ret = nfq_set_verdict2(queueHandle, packetId, NF_ACCEPT, netherConfig.markDeny, 0, NULL);
+		ret = nfq_set_verdict2(queueHandle,
+								packetId,
+								NF_ACCEPT,
+								/* if we're relaxed, let's not stress out */
+								netherConfig.relaxed ? netherConfig.markAllowAndLog : netherConfig.markDeny,
+								0,
+								NULL);
+
 	if(verdict == NetherVerdict::allowAndLog)
 		ret = nfq_set_verdict2(queueHandle, packetId, NF_ACCEPT, netherConfig.markAllowAndLog, 0, NULL);
 
