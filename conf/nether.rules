@@ -23,9 +23,8 @@
 :FORWARD ACCEPT [0:0]
 :OUTPUT ACCEPT [816152:74580343]
 :POSTROUTING ACCEPT [824147:75308906]
+-A OUTPUT -o lo -j ACCEPT
 -A OUTPUT -p tcp -m state --state NEW -j NFQUEUE --queue-num 0 --queue-bypass
-#-A OUTPUT -p udp -j NFQUEUE --queue-num 0 --queue-bypass
--A OUTPUT -p icmp -j NFQUEUE --queue-num 0 --queue-bypass
 COMMIT
 *filter
 :INPUT ACCEPT [927054:2081201095]
@@ -33,6 +32,7 @@ COMMIT
 :OUTPUT ACCEPT [805408:74228055]
 :NETHER-ALLOWLOG - [0:0]
 :NETHER-DENY - [0:0]
+-A OUTPUT -o lo -j ACCEPT
 -A OUTPUT -m mark --mark 0x3 -j NETHER-DENY
 -A OUTPUT -m mark --mark 0x4 -j NETHER-ALLOWLOG
 -A NETHER-ALLOWLOG -j AUDIT --type accept
