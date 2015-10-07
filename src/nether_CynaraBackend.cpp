@@ -38,7 +38,7 @@ const std::string cynaraErrorCodeToString(int cynaraErrorCode)
 }
 
 NetherCynaraBackend::NetherCynaraBackend(const NetherConfig &netherConfig)
-	:   NetherPolicyBackend(netherConfig), currentCynaraDescriptor(-1),
+	:   NetherPolicyBackend(netherConfig), currentCynaraDescriptor(0),
 		cynaraLastResult(CYNARA_API_UNKNOWN_ERROR)
 {
 	responseQueue.reserve(1024);
