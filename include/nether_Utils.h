@@ -44,5 +44,5 @@ std::string transportToString(const NetherTransportType transportType);
 std::string protocolToString(const NetherProtocolType protocolType);
 std::string packetToString(const NetherPacket &packet);
 template<typename ... Args> std::string stringFormat(const char* format, Args ... args);
-
+std::vector<std::string> tokenize(const std::string &str, const std::string &delimiters);
 #endif // NETHER_UTILS_H

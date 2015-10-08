@@ -23,6 +23,9 @@
  */
 
 #include "nether_CynaraBackend.h"
+#include "nether_Utils.h"
+
+using namespace std;
 
 #ifdef HAVE_CYNARA
 
@@ -39,18 +42,23 @@ const std::string cynaraErrorCodeToString(int cynaraErrorCode)
 
 NetherCynaraBackend::NetherCynaraBackend(const NetherConfig &netherConfig)
 	:   NetherPolicyBackend(netherConfig), currentCynaraDescriptor(0),
-		cynaraLastResult(CYNARA_API_UNKNOWN_ERROR)
+		cynaraLastResult(CYNARA_API_UNKNOWN_ERROR), cynaraConfig(nullptr)
 {
 	responseQueue.reserve(1024);
+	if (netherConfig.primaryBackendArgs.length() != 0)
+	{
+		parseBackendArgs();
+	}
 }
 
 NetherCynaraBackend::~NetherCynaraBackend()
 {
+	cynara_async_configuration_destroy(cynaraConfig);
 }
 
 bool NetherCynaraBackend::initialize()
 {
-	cynaraLastResult  = cynara_async_initialize(&cynaraContext, NULL, &statusCallback, this);
+	cynaraLastResult  = cynara_async_initialize(&cynaraContext, cynaraConfig, &statusCallback, this);
 	if(cynaraLastResult != CYNARA_API_SUCCESS)
 	{
 		LOGE("Failed to initialize cynara client " << cynaraErrorCodeToString(cynaraLastResult));
@@ -179,5 +187,38 @@ bool NetherCynaraBackend::processEvents()
 
 	LOGW("cynara_async_process failed " << cynaraErrorCodeToString(ret));
 	return (false);
+}
+
+void NetherCynaraBackend::setCacheSize(const size_t newCacheSize)
+{
+	int ret;
+
+	if ((ret = cynara_async_configuration_create (&cynaraConfig)) != CYNARA_API_SUCCESS)
+	{
+		LOGE("cynara_async_configuration_create failed: " << cynaraErrorCodeToString(ret));
+	}
+
+	if ((ret = cynara_async_configuration_set_cache_size(cynaraConfig, newCacheSize)) != CYNARA_API_SUCCESS)
+	{
+		LOGE("cynara_async_configuration_set_cache_size failed: " << cynaraErrorCodeToString(ret));
+	}
+
+	LOGD("new cache size: " << newCacheSize);
+}
+
+void NetherCynaraBackend::parseBackendArgs()
+{
+	vector<string> valueNamePairs = tokenize(netherConfig.primaryBackendArgs,";");
+
+	for (vector<string>::iterator it = valueNamePairs.begin(); it != valueNamePairs.end(); ++it)
+	{
+		vector<string> valueNamePair = tokenize(*it, "=");
+
+		if (valueNamePair[0] == "cache-size")
+		{
+			std::string::size_type sz;
+			setCacheSize (stoi (valueNamePair[1], &sz, 10));
+		}
+	}
 }
 #endif

@@ -32,6 +32,7 @@
 #include <sstream>
 #include <memory>
 #include <cstdint>
+#include <vector>
 
 #include <sys/types.h>
 #include <unistd.h>

@@ -53,9 +53,12 @@ class NetherCynaraBackend : public NetherPolicyBackend
 		static void checkCallback(cynara_check_id check_id, cynara_async_call_cause cause, int response, void *data);
 
 	private:
+		void parseBackendArgs();
+		void setCacheSize(const size_t newCacheSize);
 		cynara_async *cynaraContext;
 		NetherDescriptorStatus currentCynaraDescriptorStatus;
 		int currentCynaraDescriptor;
+		cynara_async_configuration *cynaraConfig;
 		std::vector<u_int32_t> responseQueue;
 		int cynaraLastResult;
 };
