@@ -197,6 +197,7 @@ struct NetherConfig
 class NetherVerdictListener
 {
 	public:
+		virtual ~NetherVerdictListener() = default;
 		virtual bool verdictCast(const u_int32_t packetId, const NetherVerdict verdict) = 0;
 };
 
@@ -232,6 +233,7 @@ class NetherVerdictCaster
 class NetherProcessedPacketListener
 {
 	public:
+		virtual ~NetherProcessedPacketListener() = default;
 		virtual void packetReceived(const NetherPacket &packet) = 0;
 };
 
