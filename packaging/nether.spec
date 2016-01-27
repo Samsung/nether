@@ -1,6 +1,6 @@
 Name:		nether
 Version:	0.0.1
-Release:	0
+Release:	1
 Source0:	%{name}-%{version}.tar.gz
 License:	Apache-2.0
 Group:		Security/Other
