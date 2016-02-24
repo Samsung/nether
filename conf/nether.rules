@@ -24,7 +24,7 @@
 :OUTPUT ACCEPT [816152:74580343]
 :POSTROUTING ACCEPT [824147:75308906]
 -A OUTPUT -o lo -j ACCEPT
--A OUTPUT -p tcp -m state --state NEW -j NFQUEUE --queue-num 0 --queue-bypass
+#-A OUTPUT -p tcp -m state --state NEW -j NFQUEUE --queue-num 0 --queue-bypass
 COMMIT
 *filter
 :INPUT ACCEPT [927054:2081201095]
