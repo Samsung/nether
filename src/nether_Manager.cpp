@@ -68,12 +68,6 @@ bool NetherManager::initialize()
 		return (false);
 	}
 
-	if(netherConfig.noRules == 0 && restoreRules() == false)
-	{
-		LOGE("Failed to setup iptables rules");
-		return (false);
-	}
-
 #ifdef HAVE_AUDIT
 	if(netherConfig.enableAudit)
 	{
@@ -119,10 +113,19 @@ bool NetherManager::initialize()
 		return (false);
 	}
 
+	/* Load the rules as last, in case we have a problem with any
+		above subsystems, we won't leave hanging useless rules */
+	if(netherConfig.noRules == 0 && restoreRules() == false)
+	{
+		LOGE("Failed to setup iptables rules");
+		return (false);
+	}
+
 	if((backendDescriptor = netherPrimaryPolicyBackend->getDescriptor()) == -1)
 	{
 		LOGI("Policy backend does not provide descriptor for select()");
 	}
+
 	return (true);
 }
 

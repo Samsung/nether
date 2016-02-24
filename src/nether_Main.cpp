@@ -29,6 +29,7 @@
 
 using namespace std;
 void showHelp(char *arg);
+void cleanupAndExit();
 
 int main(int argc, char *argv[])
 {
@@ -215,7 +216,8 @@ int main(int argc, char *argv[])
 	if(!manager.initialize())
 	{
 		LOGE("NetherManager failed to initialize, exiting");
-		return (1);
+
+		cleanupAndExit();
 	}
 
 	if(netherConfig.daemonMode)
@@ -276,4 +278,9 @@ void showHelp(char *arg)
 	cout<< "  -r,--rules-path=<path>\t\tPath to iptables rules file (default:" << NETHER_RULES_PATH << ")\n";
 	cout<< "  -i,--iptables-restore-path=<path>\tPath to iptables-restore command (default:" << NETHER_IPTABLES_RESTORE_PATH << ")\n";
 	cout<< "  -h,--help\t\t\t\tshow help information\n";
+}
+
+void cleanupAndExit()
+{
+	exit (1);
 }
