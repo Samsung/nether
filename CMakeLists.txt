@@ -19,6 +19,12 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
 PROJECT (nether)
 INCLUDE (FindPkgConfig)
+
+# Set compiler warning flags
+ADD_DEFINITIONS("-Werror")                      # Make all warnings into errors.
+ADD_DEFINITIONS("-Wall")                        # Generate all warnings
+ADD_DEFINITIONS("-Wextra")                      # Generate even more extra warnings
+
 IF (CMAKE_BUILD_TYPE MATCHES DEBUG)
 	SET (CMAKE_CXX_FLAGS "-g -Wall -Wextra -std=c++11")
 ELSE ()
@@ -34,6 +40,7 @@ ENDIF (NOT DEFINED SYSCONF_INSTALL_DIR)
 IF (NOT DEFINED SYSTEMD_UNIT_DIR)
 	SET(SYSTEMD_UNIT_DIR "${CMAKE_INSTALL_PREFIX}/lib/systemd/system")
 ENDIF (NOT DEFINED SYSTEMD_UNIT_DIR)
+
 
 ADD_SUBDIRECTORY (src)
 ADD_SUBDIRECTORY (conf)

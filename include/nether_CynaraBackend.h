@@ -58,9 +58,9 @@ class NetherCynaraBackend : public NetherPolicyBackend
 		cynara_async *cynaraContext;
 		NetherDescriptorStatus currentCynaraDescriptorStatus;
 		int currentCynaraDescriptor;
+		int cynaraLastResult;
 		cynara_async_configuration *cynaraConfig;
 		std::vector<u_int32_t> responseQueue;
-		int cynaraLastResult;
 };
 
 #endif // HAVE_CYNARA
