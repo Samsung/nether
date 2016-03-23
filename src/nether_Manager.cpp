@@ -281,11 +281,11 @@ NetherPolicyBackend *NetherManager::getPolicyBackend(const NetherConfig &netherC
 	}
 }
 
-bool NetherManager::verdictCast(const u_int32_t packetId, const NetherVerdict verdict)
+bool NetherManager::verdictCast(const u_int32_t packetId, const NetherVerdict verdict, int mark)
 {
 	if(netherNetlink)
 	{
-		netherNetlink->setVerdict(packetId, verdict);
+		netherNetlink->setVerdict(packetId, verdict, mark);
 	}
 	else
 	{

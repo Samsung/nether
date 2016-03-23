@@ -177,22 +177,44 @@ int NetherNetlink::callback(struct nfq_q_handle *, struct nfgenmsg *, struct nfq
 	return (0);
 }
 
-void NetherNetlink::setVerdict(const u_int32_t packetId, const NetherVerdict verdict)
+void NetherNetlink::setVerdict(const u_int32_t packetId, const NetherVerdict verdict, int mark)
 {
 	int ret = 0;
-	LOGD("id=" << packetId << " verdict=" << verdictToString(verdict));
+	LOGD("id=" << packetId << " verdict=" << verdictToString(verdict) << " mark=" << mark);
 
 	if(verdict == NetherVerdict::allow)
-		ret = nfq_set_verdict(queueHandle, packetId, NF_ACCEPT, 0, NULL);
+	{
+		if (mark >= 0)
+		{
+			ret = nfq_set_verdict2(queueHandle,
+								packetId,
+								NF_ACCEPT,
+								mark,
+								0,
+								NULL);
+		}
+		else
+		{
+			ret = nfq_set_verdict(queueHandle,
+								packetId,
+								NF_ACCEPT,
+								0,
+								NULL);
+		}
+	}
 
 	if(verdict == NetherVerdict::deny)
+	{
 		ret = nfq_set_verdict2(queueHandle,
 								packetId,
 								NF_ACCEPT,
 								/* if we're relaxed, let's not stress out */
-								netherConfig.relaxed ? netherConfig.markAllowAndLog : netherConfig.markDeny,
+								/* if we get a mark from the verdict caster */
+								/* let's use it, maybe it knows better */
+								mark > 0 ? mark : (netherConfig.relaxed ? netherConfig.markAllowAndLog : netherConfig.markDeny),
 								0,
 								NULL);
+	}
 
 	if(verdict == NetherVerdict::allowAndLog)
 		ret = nfq_set_verdict2(queueHandle, packetId, NF_ACCEPT, netherConfig.markAllowAndLog, 0, NULL);

@@ -17,7 +17,7 @@
 #
 
 #
-# Nether policy
+# Nether file policy backend configuration
 # $UID:$GID:$SECCTX ALLOW|DENY|ALLOW_LOG
 # If no match is found for a pcket
 # the default verdict is used (can be set via

@@ -21,7 +21,7 @@ Description=nether service
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/nether -l JOURNAL -B /etc/nether/nether.policy -r /etc/nether/nether.rules
+ExecStart=/usr/local/bin/nether -d -l JOURNAL -B /etc/nether/nether.policy -r /etc/nether/nether.rules
 Restart=on-failure
 ExecReload=/bin/kill -HUP $MAINPID
 

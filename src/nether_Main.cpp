@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 
 	if(netherConfig.daemonMode)
 	{
-		LOGD("FORKING TO BACKGROUND");
+		LOGD("Running in background, fork()");
 		if(!runAsDaemon())
 		{
 			LOGE("Failed to run as daemon: " << strerror(errno));
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		LOGD("RUNNING IF FOREGROUND");
+		LOGD("Running in foreground");
 		manager.process();
 	}
 

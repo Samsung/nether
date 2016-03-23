@@ -16,12 +16,24 @@
 #  limitations under the License
 #
 
-MESSAGE(STATUS "Installing config files")
+# this is the normal, global INTERNET
+# privilege, connections that are granted
+# this privilege do net get marked, and
+# are passed through with no additional
+# activity
+#
+# if this privilege is granted no additional
+# privileges are checked
+http://tizen.org/privilege/internet
 
-CONFIGURE_FILE(systemd/nether.service.in systemd/nether.service)
+# this is an additional privilege
+# if the normal (first) privielege is not
+# granted, all additional ones are checked
+# theese get a special packet mark
+# so that connections matching only this
+# specific privilege are passed to a
+# specific chain (0xfe)
+http://tizen.org/privilege/debug|0x0a
 
-INSTALL(FILES file.policy DESTINATION ${SYSCONF_INSTALL_DIR}/nether)
-INSTALL(FILES cynara.policy DESTINATION ${SYSCONF_INSTALL_DIR}/nether)
-INSTALL(FILES nether.rules DESTINATION ${SYSCONF_INSTALL_DIR}/nether)
-INSTALL(FILES systemd/nether.service DESTINATION ${SYSTEMD_UNIT_DIR})
-INSTALL(FILES systemd/nether.service DESTINATION ${SYSTEMD_UNIT_DIR}/multi-user.target.wants)
+# another additional privilege
+http://tizen.org/privilege/joey|0x0b

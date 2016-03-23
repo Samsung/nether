@@ -39,7 +39,7 @@ class NetherManager : public NetherVerdictListener, public NetherProcessedPacket
 		bool process();
 		NetherConfig &getConfig();
 		static NetherPolicyBackend *getPolicyBackend(const NetherConfig &netherConfig, const bool primary = true);
-		bool verdictCast(const u_int32_t packetId, const NetherVerdict verdict);
+		bool verdictCast(const u_int32_t packetId, const NetherVerdict verdict, int mark);
 		void packetReceived(const NetherPacket &packet);
 		bool restoreRules();
 

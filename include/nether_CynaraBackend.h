@@ -25,17 +25,41 @@
 #ifndef NETHER_CYNARA_BACKEND_H
 #define NETHER_CYNARA_BACKEND_H
 
-#ifdef HAVE_CYNARA
+// #ifdef HAVE_CYNARA
 
 #include <cynara-client-async.h>
 #include "nether_PolicyBackend.h"
 #include <vector>
+#include <fstream>
+#include <map>
 
+#ifndef NETHER_CYNARA_INTERNET_PRIVILEGE
 #define NETHER_CYNARA_INTERNET_PRIVILEGE "http://tizen.org/privilege/internet"
-
-const std::string cynaraErrorCodeToString(int cynaraErrorCode);
+#endif // NETHER_CYNARA_INTERNET_PRIVILEGE
 
 class NetherManager;
+
+const std::string cynaraErrorCodeToString(int cynaraErrorCode);
+typedef std::pair<std::string, u_int32_t> PrivilegePair;
+
+struct NetherCynaraCheckInfo
+{
+	NetherCynaraCheckInfo() {}
+	NetherCynaraCheckInfo(NetherPacket _packet, u_int32_t _privilegeId)
+		: packet(_packet),
+		  privilegeId(_privilegeId){}
+
+	NetherCynaraCheckInfo& operator=(const NetherCynaraCheckInfo &other)
+	{
+		packet = other.packet;
+		privilegeId = other.privilegeId;
+
+		return *this;
+	}
+
+	NetherPacket packet;
+	u_int32_t privilegeId = -1;
+};
 
 class NetherCynaraBackend : public NetherPolicyBackend
 {
@@ -44,8 +68,11 @@ class NetherCynaraBackend : public NetherPolicyBackend
 		~NetherCynaraBackend();
 		bool initialize();
 		bool enqueueVerdict(const NetherPacket &packet);
+		bool reEnqueVerdict(cynara_check_id checkId);
+		bool cynaraCheck(NetherCynaraCheckInfo checkInfo);
 		bool processEvents();
 		int getDescriptor();
+		bool parseInternalPolicy(const std::string &policyFile);
 		NetherDescriptorStatus getDescriptorStatus();
 		void setCynaraDescriptor(const int _currentCynaraDescriptor, const NetherDescriptorStatus _currentCynaraDescriptorStatus);
 		void setCynaraVerdict(cynara_check_id checkId, int cynaraResult);
@@ -60,8 +87,10 @@ class NetherCynaraBackend : public NetherPolicyBackend
 		int currentCynaraDescriptor;
 		int cynaraLastResult;
 		cynara_async_configuration *cynaraConfig;
-		std::vector<u_int32_t> responseQueue;
+		std::map<cynara_check_id, NetherCynaraCheckInfo> responseQueue;
+		std::vector<PrivilegePair> privilegeChain;
+		u_int32_t allPrivilegesToCheck;
 };
 
-#endif // HAVE_CYNARA
+// #endif // HAVE_CYNARA
 #endif // NETHER_CYNARA_BACKEND_H

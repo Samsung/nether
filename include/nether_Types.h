@@ -198,7 +198,7 @@ class NetherVerdictListener
 {
 	public:
 		virtual ~NetherVerdictListener() = default;
-		virtual bool verdictCast(const u_int32_t packetId, const NetherVerdict verdict) = 0;
+		virtual bool verdictCast(const u_int32_t packetId, const NetherVerdict verdict, int mark) = 0;
 };
 
 class NetherVerdictCaster
@@ -212,17 +212,17 @@ class NetherVerdictCaster
 			verdictListener = listenerToSet;
 		}
 
-		bool castVerdict(const NetherPacket &packet, const NetherVerdict verdict)
+		bool castVerdict(const NetherPacket &packet, const NetherVerdict verdict, const int mark = -1)
 		{
 			if(verdictListener)
-				return (verdictListener->verdictCast(packet.id, verdict));
+				return (verdictListener->verdictCast(packet.id, verdict, mark));
 			return (false);
 		}
 
-		bool castVerdict(const u_int32_t packetId, const NetherVerdict verdict)
+		bool castVerdict(const u_int32_t packetId, const NetherVerdict verdict, const int mark = -1)
 		{
 			if(verdictListener)
-				return (verdictListener->verdictCast(packetId, verdict));
+				return (verdictListener->verdictCast(packetId, verdict, mark));
 			return (false);
 		}
 
@@ -257,7 +257,7 @@ class NetherPacketProcessor
 			if(packetListener) packetListener->packetReceived(packetInfoToWrite);
 		}
 
-		virtual void setVerdict(const u_int32_t packetId, const NetherVerdict verdict) = 0;
+		virtual void setVerdict(const u_int32_t packetId, const NetherVerdict verdict, int mark = -1) = 0;
 
 	protected:
 		NetherProcessedPacketListener *packetListener;
