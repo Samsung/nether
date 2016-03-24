@@ -169,7 +169,7 @@ int NetherNetlink::callback(struct nfq_q_handle *, struct nfgenmsg *, struct nfq
 	else
 		LOGD("Failed to get security context for packet id=" << packet.id);
 
-	if(nfq_get_payload(nfa, &payload) > 0)
+	if(me->netherConfig.copyPackets && nfq_get_payload(nfa, &payload) > 0)
 		decodePacket(packet, payload);
 
 	me->processNetherPacket(packet);  /* this call if from the NetherPacketProcessor class */
@@ -177,7 +177,7 @@ int NetherNetlink::callback(struct nfq_q_handle *, struct nfgenmsg *, struct nfq
 	return (0);
 }
 
-void NetherNetlink::setVerdict(const u_int32_t packetId, const NetherVerdict verdict, int mark)
+void NetherNetlink::setVerdict(const u_int32_t packetId, const NetherVerdict verdict, int32_t mark)
 {
 	int ret = 0;
 	LOGD("id=" << packetId << " verdict=" << verdictToString(verdict) << " mark=" << mark);

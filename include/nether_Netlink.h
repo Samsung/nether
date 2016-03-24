@@ -39,7 +39,7 @@ class NetherNetlink : public NetherPacketProcessor
 		bool reload();
 		static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg, struct nfq_data *nfa, void *data);
 		bool processPacket(char *packetBuffer, const int packetReadSize);
-		void setVerdict(const u_int32_t packetId, const NetherVerdict verdict, int mark = -1);
+		void setVerdict(const u_int32_t packetId, const NetherVerdict verdict, int32_t mark = -1);
 		int getDescriptor();
 		const NetherConfig &getNetherConfig();
 		void getInterfaceInfo(struct nfq_data *nfa, NetherPacket &netherPacket);

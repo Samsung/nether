@@ -29,7 +29,7 @@ http://tizen.org/privilege/internet
 # this is an additional privilege
 # if the normal (first) privielege is not
 # granted, all additional ones are checked
-# theese get a special packet mark
+# these get a special packet mark
 # so that connections matching only this
 # specific privilege are passed to a
 # specific chain (0xfe)

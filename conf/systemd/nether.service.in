@@ -21,7 +21,7 @@ Description=nether service
 
 [Service]
 Type=simple
-ExecStart=${CMAKE_INSTALL_PREFIX}/bin/nether -l JOURNAL -B ${SYSCONF_INSTALL_DIR}/nether/nether.policy -r ${SYSCONF_INSTALL_DIR}/nether/nether.rules
+ExecStart=${CMAKE_INSTALL_PREFIX}/bin/nether -l JOURNAL -P policy=${SYSCONF_INSTALL_DIR}/nether/cynara.policy -B ${SYSCONF_INSTALL_DIR}/nether/file.policy -r ${SYSCONF_INSTALL_DIR}/nether/nether.rules
 Restart=on-failure
 ExecReload=/bin/kill -HUP $MAINPID
 

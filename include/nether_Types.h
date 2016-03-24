@@ -86,7 +86,7 @@
 #endif // NETHER_RULES_PATH
 
 #ifndef NETHER_POLICY_FILE
-#define NETHER_POLICY_FILE				"/etc/nether/nether.policy"
+#define NETHER_POLICY_FILE				"/etc/nether/file.policy"
 #endif // NETHER_POLICY_FILE
 
 
@@ -158,15 +158,15 @@ struct NetherPacket
 	uid_t uid;
 	u_int32_t id;
 	std::string securityContext;
-	int remotePort;
-	int localPort;
+	int32_t remotePort								= -1;
+	int32_t localPort								= -1;
 	gid_t gid;
 	pid_t pid;
-	char localAddress[NETHER_NETWORK_ADDR_LEN];
-	char remoteAddress[NETHER_NETWORK_ADDR_LEN];
+	char localAddress[NETHER_NETWORK_ADDR_LEN]		= {0};
+	char remoteAddress[NETHER_NETWORK_ADDR_LEN]		= {0};
 	NetherTransportType transportType;
 	NetherProtocolType protocolType;
-	char outdevName[IFNAMSIZ];
+	char outdevName[IFNAMSIZ]						= {0};
 };
 
 struct NetherConfig
@@ -212,14 +212,14 @@ class NetherVerdictCaster
 			verdictListener = listenerToSet;
 		}
 
-		bool castVerdict(const NetherPacket &packet, const NetherVerdict verdict, const int mark = -1)
+		bool castVerdict(const NetherPacket &packet, const NetherVerdict verdict, const int32_t mark = -1)
 		{
 			if(verdictListener)
 				return (verdictListener->verdictCast(packet.id, verdict, mark));
 			return (false);
 		}
 
-		bool castVerdict(const u_int32_t packetId, const NetherVerdict verdict, const int mark = -1)
+		bool castVerdict(const u_int32_t packetId, const NetherVerdict verdict, const int32_t mark = -1)
 		{
 			if(verdictListener)
 				return (verdictListener->verdictCast(packetId, verdict, mark));
@@ -257,7 +257,7 @@ class NetherPacketProcessor
 			if(packetListener) packetListener->packetReceived(packetInfoToWrite);
 		}
 
-		virtual void setVerdict(const u_int32_t packetId, const NetherVerdict verdict, int mark = -1) = 0;
+		virtual void setVerdict(const u_int32_t packetId, const NetherVerdict verdict, const int32_t mark = -1) = 0;
 
 	protected:
 		NetherProcessedPacketListener *packetListener;

@@ -25,9 +25,11 @@
 #include "nether_CynaraBackend.h"
 #include "nether_Utils.h"
 
+#include <fstream>
+
 using namespace std;
 
-// #ifdef HAVE_CYNARA
+#ifdef HAVE_CYNARA
 
 const std::string cynaraErrorCodeToString(int cynaraErrorCode)
 {
@@ -45,13 +47,15 @@ NetherCynaraBackend::NetherCynaraBackend(const NetherConfig &netherConfig)
 		cynaraLastResult(CYNARA_API_UNKNOWN_ERROR), cynaraConfig(nullptr),
 		allPrivilegesToCheck(1) /* if there is no additional policy, only one check is done */
 {
+	/* This is the default, if no policy is defined in the file or no
+		privilege name is passed in the command line, the built in
+		or the one defined at build time will be used
+		-1 is the mark that means, ACCEPT (don't mark the packet at all) */
+	privilegeChain.push_back (PrivilegePair (NETHER_CYNARA_INTERNET_PRIVILEGE, -1));
+
 	if (netherConfig.primaryBackendArgs.length() != 0)
 	{
 		parseBackendArgs();
-	}
-	else
-	{
-		privilegeChain.push_back (PrivilegePair (NETHER_CYNARA_INTERNET_PRIVILEGE, 0));
 	}
 }
 
@@ -98,8 +102,6 @@ void NetherCynaraBackend::checkCallback(cynara_check_id check_id,
 
 bool NetherCynaraBackend::cynaraCheck(NetherCynaraCheckInfo checkInfo)
 {
-	cynara_check_id checkId;
-
 	cynaraLastResult = cynara_async_check_cache(cynaraContext,
 												checkInfo.packet.securityContext.c_str(),
 												"",
@@ -112,33 +114,45 @@ bool NetherCynaraBackend::cynaraCheck(NetherCynaraCheckInfo checkInfo)
 										 << " privilege="
 										 << privilegeChain[checkInfo.privilegeId].first
 										 << " mark="
-										 << privilegeChain[checkInfo.privilegeId].second);
+										 << privilegeChain[checkInfo.privilegeId].second
+										 << " result string=\""
+										 << cynaraErrorCodeToString(cynaraLastResult)
+										 << "\""
+										 << " packetId="
+										 << checkInfo.packet.id);
 
 	switch(cynaraLastResult)
 	{
 		case CYNARA_API_ACCESS_ALLOWED:
-			LOGD(cynaraErrorCodeToString(cynaraLastResult).c_str());
-			return (castVerdict(checkInfo.packet, NetherVerdict::allow, privilegeChain[checkInfo.privilegeId].second));
+			return (castVerdict(checkInfo.packet,
+								NetherVerdict::allow,
+								privilegeChain[checkInfo.privilegeId].second));
 
 		case CYNARA_API_ACCESS_DENIED:
+			/* We need to copy this into the queue
+				other checks might be needed
+				and this information will be necessary */
+
+			responseQueue[checkInfo.checkId] = checkInfo;
+			return (reEnqueVerdict(checkInfo.checkId));
+
 		case CYNARA_API_CACHE_MISS:
-			LOGD(cynaraErrorCodeToString(cynaraLastResult).c_str());
 			cynaraLastResult = cynara_async_create_request(cynaraContext,
 							   checkInfo.packet.securityContext.c_str(),
 							   "",
 							   std::to_string(checkInfo.packet.uid).c_str(),
 							   privilegeChain[checkInfo.privilegeId].first.c_str(),
-							   &checkId,
+							   &checkInfo.checkId,
 							   &checkCallback,
 							   this);
 
 			if(cynaraLastResult == CYNARA_API_SUCCESS)
 			{
-				responseQueue[checkId] = checkInfo;
-
+				responseQueue[checkInfo.checkId] = checkInfo;
 				return (true);
 			}
 			else
+			{
 				if(cynaraLastResult == CYNARA_API_SERVICE_NOT_AVAILABLE)
 				{
 					LOGW("Cynara offline, fall back to another backend");
@@ -149,6 +163,7 @@ bool NetherCynaraBackend::cynaraCheck(NetherCynaraCheckInfo checkInfo)
 					LOGW("Error on cynara request create after CYNARA_API_CACHE_MISS " << cynaraErrorCodeToString(cynaraLastResult));
 					return (false);
 				}
+			}
 
 		default:
 			LOGW("Error on cynara request create unhandled result from cynara_async_check_cache "<<cynaraErrorCodeToString(cynaraLastResult));
@@ -160,26 +175,27 @@ bool NetherCynaraBackend::cynaraCheck(NetherCynaraCheckInfo checkInfo)
 
 bool NetherCynaraBackend::enqueueVerdict(const NetherPacket &packet)
 {
-	return (cynaraCheck ( NetherCynaraCheckInfo(packet, 0) ));
+	LOGD("packet id=" << packet.id);
+	return (cynaraCheck (NetherCynaraCheckInfo(packet, 0)));
 }
 
 bool NetherCynaraBackend::reEnqueVerdict(cynara_check_id checkId)
 {
 	NetherCynaraCheckInfo checkInfo = responseQueue[checkId];
 
-	/* We goa deny from cynara, we need to check
-		if our internal (BAD, SATANIC, EVIL) policy
+	/* We got deny from cynara, we need to check
+		if our internal policy
 		has other entries and try them too */
 	if (++checkInfo.privilegeId < allPrivilegesToCheck)
 	{
+		LOGD("more privileges in policy, keep checking id=" << checkInfo.packet.id);
 		return (cynaraCheck(checkInfo));
 	}
 	else
 	{
-		castVerdict(checkInfo.packet.id, NetherVerdict::deny);
+		LOGD("policy exhausted, deny packet id=" << checkInfo.packet.id);
+		return (castVerdict(checkInfo.packet.id, NetherVerdict::deny));
 	}
-
-	return (true);
 }
 
 void NetherCynaraBackend::setCynaraVerdict(cynara_check_id checkId, int cynaraResult)
@@ -263,6 +279,12 @@ void NetherCynaraBackend::parseBackendArgs()
 		{
 			parseInternalPolicy (valueNamePair[1]);
 		}
+
+		if (valueNamePair[0] == "privname")
+		{
+			privilegeChain.clear();
+			privilegeChain.push_back (PrivilegePair (valueNamePair[1], -1));
+		}
 	}
 }
 
@@ -273,46 +295,50 @@ bool NetherCynaraBackend::parseInternalPolicy(const std::string &policyFile)
 
 	std::ifstream policyStream (policyFile);
 
-	if (policyStream.good())
+	if (!policyStream.good())
 	{
-		std::string s, privname, mark;
-		while (std::getline (policyStream,s))
-		{
-			std::string::size_type begin = s.find_first_not_of( " \f\t\v" );
-
-			// Skip blank lines
-			if (begin == std::string::npos) continue;
-
-			// Skip commentary
-			if (std::string( "#;" ).find( s[ begin ] ) != std::string::npos) continue;
-
-			// Extract the key value
-			std::string::size_type end = s.find( '|', begin );
-			privname = s.substr( begin, end - begin );
-
-			// (No leading or trailing whitespace allowed)
-			privname.erase( privname.find_last_not_of( " \f\t\v" ) + 1 );
-
-			// No blank keys allowed
-			if (privname.empty()) continue;
-
-			// Extract the value (no leading or trailing whitespace allowed)
-			begin = s.find_first_not_of( " \f\n\r\t\v", end + 1 );
-			end   = s.find_last_not_of(  " \f\n\r\t\v" ) + 1;
-			mark = s.substr( begin, end - begin );
-
-			// Insert the properly extracted (key, value) pair into the map
-			std::cout << mark;
-			privilegeChain.push_back(PrivilegePair(privname, std::stoi(mark, 0, 16)));
-		}
-
-		allPrivilegesToCheck = privilegeChain.size();
-		return (true);
-	}
-	else
-	{
-		LOGE("Cynara policy file: " << policyFile << " failed to open");
+		LOGE("Cynara policy file: " << policyFile << " failed to open. Using default privilege: \""
+									<< privilegeChain[0].first << "\" for security checks");
 		return (false);
 	}
+
+	std::string s, privname, mark;
+	while (std::getline (policyStream,s))
+	{
+		std::string::size_type begin = s.find_first_not_of( " \f\t\v" );
+
+		// Skip blank lines
+		if (begin == std::string::npos) continue;
+
+		// Skip commentary
+		if (std::string( "#;" ).find( s[ begin ] ) != std::string::npos) continue;
+
+		// Extract the key value
+		std::string::size_type end = s.find( '|', begin );
+		privname = s.substr( begin, end - begin );
+
+		// (No leading or trailing whitespace allowed)
+		privname.erase( privname.find_last_not_of( " \f\t\v" ) + 1 );
+
+		// No blank keys allowed
+		if (privname.empty()) continue;
+
+		// Extract the value (no leading or trailing whitespace allowed)
+		begin = s.find_first_not_of( " \f\n\r\t\v", end + 1 );
+		end   = s.find_last_not_of(  " \f\n\r\t\v" ) + 1;
+		mark = s.substr( begin, end - begin );
+
+		// Insert the properly extracted (key, value) pair into the map
+		LOGD("cynara policy add privilege: " << privname << " mark:" << mark);
+		privilegeChain.push_back(PrivilegePair(privname, std::stoi(mark, 0, 16)));
+	}
+
+	/* In case we didn't get at least ONE privilege from the file
+		fall back to default */
+	if (privilegeChain.size() == 0)
+		privilegeChain.push_back (PrivilegePair (NETHER_CYNARA_INTERNET_PRIVILEGE, -1));
+
+	allPrivilegesToCheck = privilegeChain.size();
+	return (true);
 }
-// #endif
+#endif

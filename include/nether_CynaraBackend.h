@@ -22,15 +22,15 @@
  * @brief   Cynara policy backend for nether
  */
 
-#ifndef NETHER_CYNARA_BACKEND_H
+#ifndef NETHER_CYNARA_BACKEND_H // NETHER_CYNARA_BACKEND_H
 #define NETHER_CYNARA_BACKEND_H
 
-// #ifdef HAVE_CYNARA
+#ifdef HAVE_CYNARA // HAVE_CYNARA
 
 #include <cynara-client-async.h>
 #include "nether_PolicyBackend.h"
+
 #include <vector>
-#include <fstream>
 #include <map>
 
 #ifndef NETHER_CYNARA_INTERNET_PRIVILEGE
@@ -40,25 +40,27 @@
 class NetherManager;
 
 const std::string cynaraErrorCodeToString(int cynaraErrorCode);
-typedef std::pair<std::string, u_int32_t> PrivilegePair;
+typedef std::pair<std::string, int32_t> PrivilegePair;
 
 struct NetherCynaraCheckInfo
 {
 	NetherCynaraCheckInfo() {}
-	NetherCynaraCheckInfo(NetherPacket _packet, u_int32_t _privilegeId)
+	NetherCynaraCheckInfo(NetherPacket _packet, u_int32_t _privilegeId, cynara_check_id _checkId = -1)
 		: packet(_packet),
-		  privilegeId(_privilegeId){}
+		  privilegeId(_privilegeId),
+		  checkId(_checkId){}
 
 	NetherCynaraCheckInfo& operator=(const NetherCynaraCheckInfo &other)
 	{
 		packet = other.packet;
 		privilegeId = other.privilegeId;
-
+		checkId = other.checkId;;
 		return *this;
 	}
 
 	NetherPacket packet;
 	u_int32_t privilegeId = -1;
+	cynara_check_id checkId;
 };
 
 class NetherCynaraBackend : public NetherPolicyBackend
@@ -92,5 +94,5 @@ class NetherCynaraBackend : public NetherPolicyBackend
 		u_int32_t allPrivilegesToCheck;
 };
 
-// #endif // HAVE_CYNARA
+#endif // HAVE_CYNARA
 #endif // NETHER_CYNARA_BACKEND_H
